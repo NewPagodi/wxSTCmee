@@ -1,6 +1,6 @@
 wxStyledTextCtrl is a wrapper for the Scintilla text editing component.  As such it includes over 600 methods.  This breaks those methods down by the category they are listed in the scintilla documentation and presents them in a property grid.  Each method can take 0, 1, or 2 parameters.  Any parameters are set with child items in the property grid.  Some methods are set automatically, some require the user to press a button in the property grid to take effect.
 
-![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/sc.png "Screen Shot 1")
+![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/sc-2.png "Screen Shot 1")
 
 The 5 main components of the application are shown in the screen shot above.
  - in the upper left is a wxStyledTextCtrl window.  Initially it is its default state.
