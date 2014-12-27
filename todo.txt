@@ -1,0 +1,34 @@
+todo:
+- redo styled text editor dialog to use a styled text control instead of a text control.
+- cut external links out of and minimize the scintilla documentation
+- add manually declared methods and methods inherited from textentry/textarea
+- do the initial loading of the web pages on idle instead of in the constructor.
+- when AnnotationClearAll is called with event logging, it can generate so many
+  events that the logging will freeze and crash the program.  I should come up with
+  some way to see if the change events are being logged and temporarily disconect
+  the event hander if they are.
+
+partially done:
+
+maybe todo:
+- add a second propgrid that tracks things: marker handles, registered autocompletion images,
+  keys that have been bound, document handles, etc.
+- maybe if the RGBA editor dialog is called a second time I should restore the
+  last set of pixels
+- in key bindings under cmd enum add a (full list) option that will popup a dialog
+  with a complete list of commands that can be bound (maybe organized in a tree structure).
+
+done:
+- finish various things that involve manually styled text using
+  the new styled text dialog.
+- finish handles for lexer
+- finish handlers for key bindings
+- documents created with SCI_CREATELOADER(int bytes) should be added to
+  the documentRefCnt map.
+- add 3rd column for scintilla names
+- get stc documentation window working
+- rename everything from scintilla names to stc names and add scintilla names for 3rd
+  column
+- figure out why lexer.cpp takes so long to compile and cut down on compilation time.
+
+

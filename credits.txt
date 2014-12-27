@@ -1,0 +1,6 @@
+  
+wxWidgets and the wxWidgets documentation:
+	Copyright (c) 1998 Julian Smart, Robert Roebling et al
+  
+Scintilla, the Scintilla documentation, and the Scintilla icons:
+	Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
