@@ -63,39 +63,42 @@ I have no clue why those options are set in the style definition group and not t
 
 #### Coloring constants and keywords
 
-The next step is to color the constants and keywords of the language as notepad++ does.
+The next step is to color the constants and keywords of the language as notepad++ does.  This is done in 2 parts.  First we return to the lexer group and set the keywords.  
 
-- return to the lexer group
+- open the lexer group if its not still open
 - open the "SetKeyWords" subgroup
-- open the "Primary keywords and identifiers (Keyword set 0) property.
-		+ set the "keywords" property to "if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace"
-- open the "Secondary kewyords and identifiers (Keyword set 1) property.
-		+ set the "keywords" property to "void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable"
-- next we need to set the foreground color and other properties for the various types of words found in the file.  Return to the "Style definition" group.
-- open the "Style 0 ... wxSTC_STYLE_DEFAULT-1" subgroup.  This will give us a list of the categories of words that the lexer recognizes.  For most of these we only need to set the "StyleSetForeground" key.
-	+ in the wxSTC_C_COMMENT set the foreground color to rgb(0,128,0)
-	+ in the wxSTC_C_COMMENTLINE set the foreground color to rgb(0,128,0)
-	+ in the wxSTC_C_COMMENTDOC set the foreground color to rgb(0,128,128)
-	+ in the wxSTC_C_NUMBER set the foreground color to rgb(255,128,0)
-	+ in the wxSTC_C_WORD set the foreground color to rgb(0,0,255).  Notepad++ also sets these to be bold.  If we set StyleSetBold to true, doesn't seem to work.  So once again, we've seen some unexpected behavior in real time.  What we need to do is:
-		* select "Courier New" from the "StyleSetFaceName" key (even though that is the same as the default). 
-		* this then sets the size back to 8, so we need to change it to back to 10.
-		* now we can toggle the boldness with the the "StyleSetBold" key.
-		* as a programmer, we now know that we can set the color without respecifying the font name, but we can not change the boldness without doing so.  We can use the property grid to see which other explore which other properties require us to respecify the font before they can be changed.
-	+ in the wxSTC_C_STRING set the foreground color to rgb(128,128,128)
-	+ in the wxSTC_C_CHARACTER set the foreground color to rgb(128,128,128)
-	+ in the wxSTC_C_PREPROCESSOR set the foreground color to rgb(128,64,0)
-	+ in the wxSTC_C_OPERATOR set the foreground color to rgb(0,0,128).  These are also set bold.
-	+ in the wxSTC_C_REGEX set the foreground color to rgb(0,0,0). These are also set bold.
-	+ in the wxSTC_C_COMMENTLINEDOC set the foreground color to rgb(0,128,128).
-	+ in the wxSTC_C_WORD2 set the foreground color to rgb(128,0,255).
-	+ in the wxSTC_C_COMMENTDOCKEYWORD set the foreground color to rgb(0,128,128).  These are also set bold.
-	+ in the wxSTC_C_COMMENTDOCKEYWORDERROR set the foreground color to rgb(0,128,128).
-	+ as we can see, the lexer supports a number of other categories, but these are the only ones notepad++ sets to be different than the default values.
-	
-	
-	
-	
+- open the "Primary keywords and identifiers (Keyword set 0) property and set the "keywords" property to:
+	+  `if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace`
+- open the "Secondary kewyords and identifiers (Keyword set 1) property and set the "keywords" property to:
+	+ `void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable`
+
+Second, we need to set the style options for each category.  Open the "Style definition" group and then open the "Style 0 ... wxSTC_STYLE_DEFAULT-1" subgroup.  This will give us a list of the categories of words that the lexer recognizes.  For most of them we only need to set the text foreground color.  These are given in the following table:
+
+| Style Number                   | StyleSetForeground| OtherOptions  |
+|--------------------------------|-------------------|---------------|
+| wxSTC_C_COMMENT                | (0,128,0)         |               |
+| wxSTC_C_COMMENTLINE            | (0,128,0)         |               |
+| wxSTC_C_COMMENTDOC             | (0,128,128)       |               |
+| wxSTC_C_NUMBER                 | (255,128,0)       |               |
+| wxSTC_C_WORD                   | (0,0,255)         | bold          |
+| wxSTC_C_STRING                 | (128,128,128)     |               |
+| wxSTC_C_CHARACTER              | (128,128,128)     |               |
+| wxSTC_C_PREPROCESSOR           | (128,64,0)        |               |
+| wxSTC_C_OPERATOR               | (0,0,128)         | bold          |
+| wxSTC_C_REGEX                  | (0,0,0)           | bold          |
+| wxSTC_C_COMMENTLINEDOC         | (0,128,128)       |               |
+| wxSTC_C_WORD2                  | (128,0,255)       |               |
+| wxSTC_C_COMMENTDOCKEYWORD      | (0,128,128)       | bold          |
+| wxSTC_C_COMMENTDOCKEYWORDERROR | (0,128,128)       |               |	
+
+Once all the colors are set, we also need to set wxSTC_C_WORD, wxSTC_C_OPERATOR, wxSTC_C_REGEX, and wxSTC_C_COMMENTDOCKEYWORDERROR to be bold.  Lets focus on the wxSTC_C_WORD category.  Open this category in the propgrid and try setting the StyleSetBold key to be true.  Nothing happens.  What we need to do is   
+
+- select "Courier New" from the "StyleSetFaceName" key (even though that is the same as the default). 
+- this then sets the size back to 8, so we need to change it to back to 10.
+- now we can toggle the boldness with the the "StyleSetBold" key.
+
+Repeat this process for the other 3 categories.  Now as a programmer, we now know that for each categories some of the style options such as color can be set using the default font, but other such as boldness will require us to respecify the font name before we can set them.  
+
 #### Highlighting the current line	
 
 Notepad++ also highlights the line containing the cursor.  This behavior can be set as follows:
