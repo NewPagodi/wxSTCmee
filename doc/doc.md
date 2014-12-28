@@ -217,7 +217,114 @@ This is accomplished programmatically as follows:
 
 ![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/folded.png "Folded Code")
   
-	
+#### Putting what we've learned into code
+
+Assuming our wxStyledTextCtrl is named m_stc, we can translate everything we've done above directly into code.  For each step of the process, the method to call has the same name as the key that was set in the propgrid.  Any arguments needed  for the method are either given by the value of the key or the value of child properties of that key.  The complete code is as follows:
+
+```c++
+    m_stc->SetMarginWidth(0,30);
+    m_stc->SetMarginWidth(2,14);
+    m_stc->SetMarginMask(2,wxSTC_MASK_FOLDERS);
+    m_stc->SetFoldMarginColour(true,wxColor(255,255,255));
+    m_stc->SetFoldMarginHiColour(true,wxColor(233,233,233));
+    m_stc->SetLexer(wxSTC_LEX_CPP);
+
+    m_stc->StyleSetFaceName(wxSTC_STYLE_DEFAULT,"Courier New");
+    m_stc->StyleSetSize(wxSTC_STYLE_DEFAULT,10);
+    m_stc->StyleSetForeground(wxSTC_STYLE_LINENUMBER,wxColor(128,128,128));
+    m_stc->StyleSetBackground(wxSTC_STYLE_LINENUMBER,wxColor(228,228,228));
+
+    m_stc->SetKeyWords(0,"if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace");
+    m_stc->SetKeyWords(1,"void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable");
+
+    m_stc->StyleSetForeground(wxSTC_C_COMMENT,               wxColor(0,128,0));
+    m_stc->StyleSetForeground(wxSTC_C_COMMENTLINE,           wxColor(0,128,0)  );
+    m_stc->StyleSetForeground(wxSTC_C_COMMENTDOC,            wxColor(0,128,128)  );
+    m_stc->StyleSetForeground(wxSTC_C_NUMBER,                wxColor(255,128,0) );
+    m_stc->StyleSetForeground(wxSTC_C_WORD,                  wxColor(0,0,255));
+    m_stc->StyleSetForeground(wxSTC_C_STRING,                wxColor(128,128,128) );
+    m_stc->StyleSetForeground(wxSTC_C_CHARACTER,             wxColor(128,128,128) );
+    m_stc->StyleSetForeground(wxSTC_C_PREPROCESSOR,          wxColor(128,64,0) );
+    m_stc->StyleSetForeground(wxSTC_C_OPERATOR,              wxColor(0,0,128));
+    m_stc->StyleSetForeground(wxSTC_C_REGEX,                 wxColor(0,0,0) );
+    m_stc->StyleSetForeground(wxSTC_C_COMMENTLINEDOC,        wxColor(0,128,128));
+    m_stc->StyleSetForeground(wxSTC_C_WORD2,                 wxColor(128,0,255));
+    m_stc->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORD,     wxColor(0,128,128));
+    m_stc->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORDERROR,wxColor(0,128,128) );
+
+    m_stc->StyleSetFaceName(wxSTC_C_WORD,"Courier New");
+    m_stc->StyleSetSize(wxSTC_C_WORD,10);
+    m_stc->StyleSetBold(wxSTC_C_WORD,true);
+
+    m_stc->StyleSetFaceName(wxSTC_C_OPERATOR,"Courier New");
+    m_stc->StyleSetSize(wxSTC_C_OPERATOR,10);
+    m_stc->StyleSetBold(wxSTC_C_OPERATOR,true);
+
+    m_stc->StyleSetFaceName(wxSTC_C_REGEX,"Courier New");
+    m_stc->StyleSetSize(wxSTC_C_REGEX,10);
+    m_stc->StyleSetBold(wxSTC_C_REGEX,true);
+
+    m_stc->StyleSetFaceName(wxSTC_C_COMMENTDOCKEYWORD,"Courier New");
+    m_stc->StyleSetSize(wxSTC_C_COMMENTDOCKEYWORD,10);
+    m_stc->StyleSetBold(wxSTC_C_COMMENTDOCKEYWORD,true);
+
+    m_stc->SetCaretLineVisible(true);
+    m_stc->SetCaretLineBackground(wxColor(232,232,255));
+
+    m_stc->SetProperty("lexer.cpp.track.preprocessor","0");
+    m_stc->SetExtraAscent(1);
+    m_stc->SetExtraDescent(1);
+
+    m_stc->SetProperty("styling.within.preprocessor",   "1");
+    m_stc->SetProperty("lexer.cpp.allow.dollars",       "0");
+    //m_stc->SetProperty("lexer.cpp.track.preprocessor","");
+    m_stc->SetProperty("lexer.cpp.update.preprocessor", "1");
+    m_stc->SetProperty("lexer.cpp.triplequoted.strings","0");
+    m_stc->SetProperty("lexer.cpp.hashquoted.strings",  "0");
+    m_stc->SetProperty("fold",                          "1");
+    m_stc->SetProperty("fold.cpp.syntax.based",         "1");
+    m_stc->SetProperty("fold.comment",                  "1");
+    m_stc->SetProperty("fold.cpp.comment.multiline",    "1");
+    m_stc->SetProperty("fold.cpp.comment.explicit",     "0");
+    m_stc->SetProperty("fold.cpp.explicit.start",       "");
+    m_stc->SetProperty("fold.cpp.explicit.end",         "");
+    m_stc->SetProperty("fold.cpp.explicit.anywhere",    "0");
+    m_stc->SetProperty("fold.preprocessor",             "1");
+    m_stc->SetProperty("fold.compact",                  "0");
+    m_stc->SetProperty("fold.at.else",                  "1");
+
+    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEREND,wxSTC_MARK_BOXPLUSCONNECTED);
+    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDEREND,wxColor(243,243,243));
+    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDEREND,wxColor(128,128,128));
+
+    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPENMID,wxSTC_MARK_BOXMINUSCONNECTED);
+    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDEROPENMID,wxColor(243,243,243));
+    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDEROPENMID,wxColor(128,128,128));
+
+    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_TCORNER);
+    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDERMIDTAIL,wxColor(243,243,243));
+    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDERMIDTAIL,wxColor(128,128,128));
+
+    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL,wxSTC_MARK_LCORNER);
+    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDERTAIL,wxColor(243,243,243));
+    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDERTAIL,wxColor(128,128,128));
+
+    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERSUB,wxSTC_MARK_VLINE);
+    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDERSUB,wxColor(243,243,243));
+    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDERSUB,wxColor(128,128,128));
+
+    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDER,wxSTC_MARK_BOXPLUS);
+    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDER,wxColor(243,243,243));
+    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDER,wxColor(128,128,128));
+
+    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPEN,wxSTC_MARK_BOXMINUS);
+    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDEROPEN,wxColor(243,243,243));
+    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDEROPEN,wxColor(128,128,128));
+
+    m_stc->MarkerEnableHighlight(true);
+``` 
+
+
 
 
 	
