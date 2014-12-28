@@ -26,7 +26,7 @@ Lets begin with the margins.  Notepad++ actually has 3 margins visible: a margin
  - change the value for the property "SetMarginWidth" to 30.
  - the defaults for the margin 1 (the bookmark margin) are fine, so we move on to the fold margin
  - open "Margin 2"
- - change "SetMarginWidth" to 16.
+ - change "SetMarginWidth" to 14.
  - from the dropdown list in "SetMarginMask" select "wxSTC_MASK_FOLDERS"
  
 Let me backup for a second and discuss how you can translate properties from the property grid to your program.  Suppose your wxStyledTextCtrl is named m_stc.  In the work above, we changed the margin width for margin 0 to 30.  This can be accomplished with the command "m_stc->SetMarginWidth(0,30)"  Next we changed the width and mask of margin 2.  These are accomplished with "m_stc->SetMarginWidth(2,16)" and "m_stc->SetMarginMask(2,wxSTC_MASK_FOLDERS)".  For almost all the things to be set, the name of the method to call is the key in the property grid.
@@ -34,10 +34,12 @@ Let me backup for a second and discuss how you can translate properties from the
 Next, margins have the wrong colors.  We can fix the fold margin now: 
 
  - open the "SetFoldMarginColour" item
+	+ set the back parameter to rgb (255,255,255).  (You can either type/paste (255,255,255) into the value area or press the button labeled '...' to open a color setting dialog where you can enter those values.)
 	+ set the useSetting parameter to true
-	+ set the back parameter to rgb (233,233,233).  You'll need to press the button labeled '...' to open a color setting dialog where you can enter those values.
-
-For whatever reason, the line number and bookmark margin colors are set in a different property group, so I'll cover that when we get there.
+ - open the "SetFoldMarginHiColour" item
+	+ set the fore parameter to rgb (233,233,233). 
+	+ set the useSetting parameter to true
+ - For whatever reason, the line number and bookmark margin colors are set in a different property group, so I'll cover that when we get there.
 
 #### Setting the lexer (and repairing the damage setting the lexer does)
 
@@ -91,6 +93,9 @@ The next step is to color the constants and keywords of the language as notepad+
 	+ in the wxSTC_C_COMMENTDOCKEYWORDERROR set the foreground color to rgb(0,128,128).
 	+ as we can see, the lexer supports a number of other categories, but these are the only ones notepad++ sets to be different than the default values.
 	
+	
+	
+	
 #### Highlighting the current line	
 
 Notepad++ also highlights the line containing the cursor.  This behavior can be set as follows:
@@ -99,16 +104,24 @@ Notepad++ also highlights the line containing the cursor.  This behavior can be 
 - set the "SetCaretLineVisible" key to true.
 - to match the color that notepad++ uses, set the "SetCaretLineBackground" to rgb(232,232,255)
 	
-#### Removing indicators
+#### Fixing a few more things:
 
-By now the wxStyledTextCtrl is closely resembles the notepad++ window.  One of the remaining differences is that some of the lines in the wxStyledTextCtrl such as lines 11 and 15 have an blue squigle under them.  This is an example of a style byte indicator.  They can be used by wxStyledTextCtrl to indicate syntax errors or other things about the code that should be brought to the user's attention.  But here it's just annoying.  We can turn it off as follows:
+By now the wxStyledTextCtrl is closely resembles the notepad++ window.  Lets look at a comparison: 
 
 ![Squigles](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/comp2.png "A second comparison")
+
+One of the remaining differences is that some of the lines in the wxStyledTextCtrl such as lines 11 and 15 have an blue squigle under them.  This is an example of a style byte indicator.  They can be used by wxStyledTextCtrl to indicate syntax errors or other things about the code that should be brought to the user's attention.  But here it's just annoying.  We can turn it off as follows:
 
 - return the the lexer group.
 - open the "SetLexer" subgroup.  This subgroup only appears once a lexer has been selected and the options in this subgroup vary from lexer to lexer.
 - when the cpp lexer is selected, the option that causes that blue squigle is "lexer.cpp.track.preprocessor".  Set that property to false.  You may have to toggle it a few times to make it go away.
 	
+Another difference is that notepad++ has 2 extra pixels spacing for each line than wxStyledTextCtrl has by default.  To add these, we do the following:
+
+- open the "White space" group
+- set the "SetExtraAscent" key to have value 1
+- set the "SetExtraDescent" key to also have value 1
+  
 #### Using the bookmark margin
 
 Next I want to give an example of how notepad++ uses its bookmark margin.  When the user clicks the bookmark margin it adds a shiny blue circle like so:
@@ -174,15 +187,16 @@ This looks nothing like what we wanted.  The problem is that wxStyledTextCtrl us
 - return to the markers group
 - open the marker definitions subgroup if its not still open
 - for markers 25 - 31 (wxSTC_MARKNUM_FOLDEREND - wxSTC_MARKNUM_FOLDEROPEN) we need to change:
-	+ set MarkerSetForeground to rgb(255,255,255) (aka:white)
-	+ set MarkerSetBackground to rgb(0,0,0) (aka: black)
+	+ set MarkerSetForeground to rgb(243,243,243)
+	+ set MarkerSetBackground to Grey or rgb(128,128,128)
 - for wxSTC_MARKNUM_FOLDEREND set MarkerDefine to wxSTC_MARK_BOXPLUSCONNECTED
 - for wxSTC_MARKNUM_FOLDEROPENMID set MarkerDefine to wxSTC_MARK_BOXMINUSCONNECTED
 - for wxSTC_MARKNUM_FOLDERMIDTAIL set MarkerDefine to wxSTC_MARK_TCORNER
 - for wxSTC_MARKNUM_FOLDERTAIL set MarkerDefine to wxSTC_MARK_LCORNER
 - for wxSTC_MARKNUM_FOLDERSUB set MarkerDefine to wxSTC_MARK_VLINE
 - for wxSTC_MARKNUM_FOLDER set MarkerDefine to wxSTC_MARK_BOXPLUS
-- for wxSTC_MARKNUM_FOLDEROPEN set MarkerDefine to wxSTC_MARK_BOXMINUS  
+- for wxSTC_MARKNUM_FOLDEROPEN set MarkerDefine to wxSTC_MARK_BOXMINUS 
+- for any marker, set the MarkerEnableHighlight key to true.  (In the property grid, setting this key for 1 marker automatically sets all the other markers to have the same value.)  
         
 #### Folding
 
