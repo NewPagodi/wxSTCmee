@@ -1,3 +1,5 @@
+## wxStyledTextCtrl Method and Event Explorer 
+
 wxStyledTextCtrl is a wrapper for the Scintilla text editing component.  As such it includes over 600 methods.  This breaks those methods down by the category they are listed in the scintilla documentation and presents them in a property grid.  Each method can take 0, 1, or 2 parameters.  Any parameters are set with child items in the property grid.  Some methods are set automatically, some require the user to press a button in the property grid to take effect.
 
 ![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/sc-2.png "Screen Shot 1")
@@ -8,6 +10,8 @@ The 5 main components of the application are shown in the screen shot above.
  - in the middle is a listing of the events emitted by the wxStyledTextCtrl.  No events will be logged unless they are selected in from the "Logged Events" menu item.
  - in the lower left is a (slightly modified) version of the scintilla documentation.  As how select an item in the property grid, the documentation for that item is scrolled into view.
  - in the lower right is a (heavily edited) version of the wxStyledTextCtrl documentation.  As with the Scintilla documentation, the appropriate section is scrolled into view when an item is selected in the property grid.
+ 
+## Making wxStyledTextCtrl look like notepad++ 
  
 Lets work through an example of how to make a wxStyledTextCtrl showing a c++ file look like notepad++ showing the same c++ file.  The following shows a fragment of the stcMain.cpp file from this repo open in notepad++ and the same file pasted into the wxStyledTextCtrl.  Amongst the most notable differences: the wxStyledTextCtrl is using a variable width font and has a small font size.  The notepad++ window has a fixed width font, has colored the comments and keywords of the language to help us identify them, and has a nice margin to the left showing the linenumbers and allowing us to collapse code.  Overall, the file in notepad++ is much more readable.
 
@@ -35,8 +39,8 @@ For whatever reason, the line number and bookmark margin colors are set in a dif
 
 The next step is to set the lexer to tell the wxStyledTextCtrl that we're working with a c++ file and not just any type of text file. 
 
-	- open the lexer group
-	- change "SetLexer" from "wx_STC_LEX_CONTAINER" to "wx_STC_LEX_CPP"
+- open the lexer group
+- change "SetLexer" from "wx_STC_LEX_CONTAINER" to "wx_STC_LEX_CPP"
 	
 Now, somewhat surprisingly, the next time you click in the wxStyledTextCtrl window, all the text seems to disappear.  It's actually been colored white.  That seems to happen the first time a lexer value is set.  I'm not sure why wxStyledTextCtrl/Scintilla does that, but as a programmer, it's good to know that so we can fix it.  With the method and event explorer, we've seen a surprising outcome happen in real time.  We can fix it as follows.
 
