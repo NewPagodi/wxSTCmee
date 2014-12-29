@@ -27,13 +27,13 @@ Lets begin with the margins.  Notepad++ actually has 3 margins visible: a margin
 
  - open the "Margins" group in the propgrid.  It's towards the middle of the propgrid: <br>![margins group location in the propgrid](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/margins.png "Margins group")
  - open the "Margin 0" subgroup
- - change the value for the property "SetMarginWidth" to 30: <br>![margin0 setting](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/margin0.png "Margins0a")
+	+ change the value for the property "SetMarginWidth" to 30: <br>![margin0 setting](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/margin0a.png "Margins0a")
  - the defaults for the margin 1 (the bookmark margin) are fine, so we move on to the fold margin
  - open the "Margin 2" subgroup
- - change "SetMarginWidth" to 14
- - from the dropdown list in "SetMarginMask" select "wxSTC_MASK_FOLDERS": <br>![margin2 setting](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/margin2.png "Margins2")
+	+ change "SetMarginWidth" to 14
+	+ from the dropdown list in "SetMarginMask" select "wxSTC_MASK_FOLDERS": <br>![margin2 setting](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/margin2.png "Margins2")
  
-Next, margins have the wrong colors.  We can we fix the color of fold margin as follows: 
+Our wxStyledTextCtrl window now has 3 margins with the correct widths.  Those margins however have the wrong colors.  We can we fix the color of the fold margin as follows: 
 
  - open the "SetFoldMarginColour" item
  	+ set the useSetting parameter to true
@@ -46,7 +46,9 @@ For whatever reason, the colors for the other margins are set in a different pro
 
 #### Translating the properties to code
 
-There are many more options that need to be set; but before moving on, let me backup for a second and discuss how you can translate properties we set in the property grid to code that you use in your program.  Suppose your wxStyledTextCtrl is named m_stc.  In the work above, we changed the margin width for margin 0 to 30.  This can be accomplished with the command "m_stc->SetMarginWidth(0,30)".  Notice that the name of the method that needs to be called is the same as the key that was set in the property grid. 
+There are many more options that need to be set.  But before moving on, let me pause for a second to discuss how you can translate the properties that are set in the property grid to code that you use in your program.  In the work above, we changed the margin width for margin 0 to 30.  The code to accomplish this would be `m_stc->SetMarginWidth(0,30)`.  Notice that the name of the method that needs to be called is the same as the key that was set in the property grid.  
+
+This command supposes your wxStyledTextCtrl is named m_stc. You would, of course, replace "m_stc" with the name for the wxStyledTextCtrl used in your code
 
 Next we changed the width and mask of margin 2.  These are accomplished with "m_stc->SetMarginWidth(2,16)" and "m_stc->SetMarginMask(2,wxSTC_MASK_FOLDERS)".  For almost all the things to be set, the name of the method to call is the key in the property grid.
  
