@@ -5,7 +5,7 @@ wxStyledTextCtrl is a wrapper for the Scintilla text editing component.  As such
 ![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/sc-2.png "Screen Shot 1")
 
 The 5 main components of the application are shown in the screen shot above.
- - in the upper left is a wxStyledTextCtrl window.  Initially it is its default state.
+ - in the upper left is a wxStyledTextCtrl window.
  - in the upper right is a property grid.  Setting properties in the property grid changes the state of the wxStyledTextCtrl.
  - in the middle is a listing of the events emitted by the wxStyledTextCtrl.  No events will be logged unless they are selected in from the "Logged Events" menu item.
  - in the lower left is a (slightly modified) version of the scintilla documentation.  As how select an item in the property grid, the documentation for that item is scrolled into view.
@@ -13,9 +13,11 @@ The 5 main components of the application are shown in the screen shot above.
 
 ## Making wxStyledTextCtrl look like notepad++ 
 
-Lets work through an example of how to make a wxStyledTextCtrl showing a c++ file look like notepad++ showing the same c++ file.  The following shows a fragment of the stcMain.cpp file from this repo open in notepad++ and the same file pasted into the wxStyledTextCtrl.  Amongst the most notable differences: the wxStyledTextCtrl is using a variable width font and has a small font size.  The notepad++ window has a fixed width font, has colored the comments and keywords of the language to help us identify them, and has a nice margin to the left showing the linenumbers and allowing us to collapse code.  Overall, the file in notepad++ is much more readable.
+Lets work through an example of how to make a wxStyledTextCtrl show a c++ file in the same way notepad++ shows ing the same c++ file.  The following shows a fragment of the stcMain.cpp file from this repo open in notepad++ and the same file pasted into the wxStyledTextCtrl.  
 
-![Raw wxStyledTextCtrl vrs notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/comp1.png "Comparison 1")
+![Raw wxStyledTextCtrl vrs notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/stc_np++comp.png "Comparison 1")
+
+Amongst the most notable differences: the wxStyledTextCtrl is using a variable width font and has a small font size.  The notepad++ window has a fixed width font, has colored the comments and keywords of the language to help us identify them, and has a nice margin to the left showing the linenumbers and allowing us to collapse code.  Overall, the file in notepad++ is much more readable.
 
 #### Fixing the margins
 
