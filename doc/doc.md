@@ -13,19 +13,21 @@ The 5 main components of the application are shown in the screen shot above.
 
 ## Making wxStyledTextCtrl look like notepad++ 
 
-Lets work through an example of how to make a wxStyledTextCtrl show a c++ file in the same way notepad++ shows ing the same c++ file.  The following shows a fragment of the stcMain.cpp file from this repo open in notepad++ and the same file pasted into the wxStyledTextCtrl.  
+The following shows a fragment of the stcMain.cpp file from this repo pasted into a freshly created wxStyledTextCtrl window and the same file opened in notepad++.
 
 ![Raw wxStyledTextCtrl vrs notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/stc_np++comp.png "Comparison 1")
 
-Amongst the most notable differences: the wxStyledTextCtrl is using a variable width font and has a small font size.  The notepad++ window has a fixed width font, has colored the comments and keywords of the language to help us identify them, and has a nice margin to the left showing the linenumbers and allowing us to collapse code.  Overall, the file in notepad++ is much more readable.
+The wxStyledTextCtrl window is using a variable width font and has a smaller font size.  In contrast, the notepad++ window has a fixed width font, has colored the comments and keywords of the language to help us identify them, and has some nice margins on the left showing the line numbers and allowing us to collapse code.  I think most coders would agree that the version presented by notepad++ is much more readable.  
+
+Lets work through the process of making a wxStyledTextCtrl window show code in the same way notepad++ does.    
 
 #### Fixing the margins
 
-Lets begin with the margins.  Notepad++ actually has 3 margins visible: a margin for the linenumbers, a margin for bookmarks, and a margin with the boxes we click to collapse code.  The wxStyledTextCtrl options for setting these things are in the "Margins" area of the propgrid
+Lets begin with the margins.  Notepad++ actually has 3 margins visible: a margin for the line numbers, a margin for bookmarks, and a margin with the boxes we click to collapse code.  The wxStyledTextCtrl options for setting these things are in the "Margins" area of the propgrid.  
 
- - open "Margins"
- - open "Margin 0"
- - change the value for the property "SetMarginWidth" to 30.
+ - open the "Margins" group in the propgrid.  It's towards the middle of the propgrid: ![margins group location in the propgrid](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/margins.png "Margins group")
+ - open the "Margin 0" subgroup
+ - change the value for the property "SetMarginWidth" to 30: ![margin0 setting](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/margin0.png "Margins0")
  - the defaults for the margin 1 (the bookmark margin) are fine, so we move on to the fold margin
  - open "Margin 2"
  - change "SetMarginWidth" to 14.
