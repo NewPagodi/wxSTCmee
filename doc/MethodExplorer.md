@@ -19,7 +19,7 @@ There are 5 separate windows.  On the upper left is a wxStyledTextCtrl window.  
 
 There's a 6th window named the code log.  It can be shown by selecting "View->Show Code" from the menu. 
 
-![The Show Code Menu Item](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/stcmee.png "The Show Code Menu Item") 
+![The Show Code Menu Item](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/showCodeMenu.png "The Show Code Menu Item") 
 
 The code log window will look something like the following:
 
