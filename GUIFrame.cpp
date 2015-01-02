@@ -39,6 +39,9 @@ GUIFrame::GUIFrame( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_menu1->Append( m_menuItem35 );
 	m_menuItem35->Check( true );
 	
+	m_menuItem36 = new wxMenuItem( m_menu1, wxID_ANY, wxString( wxT("ShowCode") ) , wxEmptyString, wxITEM_CHECK );
+	m_menu1->Append( m_menuItem36 );
+	
 	m_menu1->AppendSeparator();
 	
 	wxMenuItem* m_menuItem1;
@@ -193,15 +196,18 @@ GUIFrame::GUIFrame( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_EventLog->AppendTextColumn("WParam");
 	m_EventLog->AppendTextColumn("X");
 	m_EventLog->AppendTextColumn("Y");
-	m_mgr.AddPane( m_EventLog, wxAuiPaneInfo() .Name( wxT("m_EventLog") ).Bottom() .MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( -1,-1 ) ).DockFixed( false ).Row( 1 ) );
+	m_mgr.AddPane( m_EventLog, wxAuiPaneInfo() .Name( wxT("m_EventLog") ).Bottom() .Caption( wxT("Event Log") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( -1,-1 ) ).DockFixed( false ).Row( 3 ) );
 	
 	m_browser = wxWebView::New(this, wxID_ANY);
 	   m_browser->RegisterHandler(wxSharedPtr<wxWebViewHandler>(new wxWebViewFSHandler("memory")));
-	m_mgr.AddPane( m_browser, wxAuiPaneInfo() .Name( wxT("m_browser") ).Bottom() .MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).DockFixed( false ).BestSize( wxSize( -1,200 ) ) );
+	m_mgr.AddPane( m_browser, wxAuiPaneInfo() .Name( wxT("m_browser") ).Bottom() .Caption( wxT("Scintilla Documentation") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).DockFixed( false ).BestSize( wxSize( -1,200 ) ) );
 	
 	m_STCDoc = wxWebView::New(this, wxID_ANY);
 	m_STCDoc->RegisterHandler(wxSharedPtr<wxWebViewHandler>(new wxWebViewFSHandler("memory")));
-	m_mgr.AddPane( m_STCDoc, wxAuiPaneInfo() .Name( wxT("m_STCDoc") ).Bottom() .MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).DockFixed( false ) );
+	m_mgr.AddPane( m_STCDoc, wxAuiPaneInfo() .Name( wxT("m_STCDoc") ).Bottom() .Caption( wxT("wxStyledTextCtrl Documentation") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).DockFixed( false ) );
+	
+	m_CodeLog = new wxStyledTextCtrl(this);
+	m_mgr.AddPane( m_CodeLog, wxAuiPaneInfo() .Name( wxT("m_CodeLog") ).Bottom() .Caption( wxT("Code Log") ).MaximizeButton( true ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxSize( 57,172 ) ).DockFixed( false ).Row( 2 ) );
 	
 	statusBar = this->CreateStatusBar( 2, wxST_SIZEGRIP, wxID_ANY );
 	
@@ -215,6 +221,7 @@ GUIFrame::GUIFrame( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->Connect( m_menuItem33->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onViewEventLog ) );
 	this->Connect( m_menuItem34->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onViewSciDoc ) );
 	this->Connect( m_menuItem35->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onViewStcDoc ) );
+	this->Connect( m_menuItem36->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::OnShowCode ) );
 	this->Connect( m_menuItem1->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::On3rdColumnMenu ) );
 	this->Connect( m_menuItem2->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onSTCLogMenu ) );
 	this->Connect( m_menuItem3->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onSTCLogMenu ) );
@@ -256,6 +263,7 @@ GUIFrame::~GUIFrame()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onViewEventLog ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onViewSciDoc ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onViewStcDoc ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::OnShowCode ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::On3rdColumnMenu ) );
 	this->Disconnect( MENU_STC_AUTOCOMP_CANCELLED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onSTCLogMenu ) );
 	this->Disconnect( MENU_STC_AUTOCOMP_CHAR_DELETED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrame::onSTCLogMenu ) );

@@ -91,6 +91,7 @@ class propgridtest03Frame: public GUIFrameWEnum
 
         wxString restoreString;
         wxWindow* toBeDetached;
+        wxAuiPaneInfo codeLogInfo;
         wxAuiPaneInfo eventLogInfo;
 		wxAuiPaneInfo sciDocInfo;
 		wxAuiPaneInfo stcDocInfo;
@@ -98,6 +99,8 @@ class propgridtest03Frame: public GUIFrameWEnum
 		void onSTCLogMenu(wxCommandEvent& event);
 
 		void On3rdColumnMenu( wxCommandEvent& event );
+		void OnShowCode( wxCommandEvent& event );
+
 
 
         void OnPGSelected(wxPropertyGridEvent& event);

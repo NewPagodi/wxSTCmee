@@ -84,12 +84,14 @@ class GUIFrame : public wxFrame
 		wxMenuItem* m_menuItem33;
 		wxMenuItem* m_menuItem34;
 		wxMenuItem* m_menuItem35;
+		wxMenuItem* m_menuItem36;
 		wxMenu* m_menu2;
 		wxStyledTextCtrl* m_scintilla1;
 		wxPropertyGrid* m_propgrid;
 		wxDataViewListCtrl* m_EventLog;
 		wxWebView* m_browser;
 		wxWebView* m_STCDoc;
+		wxStyledTextCtrl* m_CodeLog;
 		wxStatusBar* statusBar;
 		
 		// Virtual event handlers, overide them in your derived class
@@ -100,13 +102,14 @@ class GUIFrame : public wxFrame
 		virtual void onViewEventLog( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onViewSciDoc( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onViewStcDoc( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnShowCode( wxCommandEvent& event ) { event.Skip(); }
 		virtual void On3rdColumnMenu( wxCommandEvent& event ) { event.Skip(); }
 		virtual void onSTCLogMenu( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
 		
-		GUIFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("wxWidgets Application Template"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 900,675 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		GUIFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("wxStyledTextCtrl Method and Event Explorer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 900,675 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		wxAuiManager m_mgr;
 		
 		~GUIFrame();

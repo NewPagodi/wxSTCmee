@@ -39,13 +39,50 @@
 
 propgridtest03Frame::propgridtest03Frame(wxFrame *frame): GUIFrameWEnum(frame)
 {
-    m_mgr.LoadPerspective("layout2|name=m_scintilla1;caption=;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=196;besth=79;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_propgrid;caption=;state=392;dir=2;layer=0;row=0;pos=0;prop=100000;bestw=450;besth=-1;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_EventLog;caption=;state=2098684;dir=3;layer=0;row=1;pos=0;prop=100000;bestw=96;besth=76;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=392;floaty=459;floatw=104;floath=102|name=m_browser;caption=;state=12584876;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=-1;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_STCDoc;caption=;state=14682108;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=16;besth=16;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=198|dock_size(2,0,0)=444|dock_size(3,0,0)=180|dock_size(3,0,1)=152|");
+    //m_mgr.LoadPerspective("layout2|name=m_scintilla1;caption=;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=196;besth=79;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_propgrid;caption=;state=392;dir=2;layer=0;row=0;pos=0;prop=100000;bestw=450;besth=-1;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_EventLog;caption=;state=2098684;dir=3;layer=0;row=1;pos=0;prop=100000;bestw=96;besth=76;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=392;floaty=459;floatw=104;floath=102|name=m_browser;caption=;state=12584876;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=-1;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_STCDoc;caption=;state=14682108;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=16;besth=16;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=198|dock_size(2,0,0)=444|dock_size(3,0,0)=180|dock_size(3,0,1)=152|");
 
     eventLogInfo = m_mgr.GetPane(m_EventLog);
     sciDocInfo   = m_mgr.GetPane(m_browser);
     stcDocInfo   = m_mgr.GetPane(m_STCDoc);
+    codeLogInfo = m_mgr.GetPane(m_CodeLog);
 
     toBeDetached=nullptr;
+
+    m_CodeLog->SetMarginWidth(1,0);
+    m_CodeLog->SetLexer(wxSTC_LEX_CPP);
+    m_CodeLog->StyleSetFaceName(wxSTC_STYLE_DEFAULT,"Courier New");
+    m_CodeLog->StyleSetSize(wxSTC_STYLE_DEFAULT,8);
+	m_CodeLog->StyleClearAll();
+    m_CodeLog->SetKeyWords(0,"if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace");
+    m_CodeLog->SetKeyWords(1,"void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable");
+
+    m_CodeLog->StyleSetForeground(wxSTC_C_COMMENT,               wxColor(0,128,0));
+    m_CodeLog->StyleSetForeground(wxSTC_C_COMMENTLINE,           wxColor(0,128,0)  );
+    m_CodeLog->StyleSetForeground(wxSTC_C_COMMENTDOC,            wxColor(0,128,128)  );
+    m_CodeLog->StyleSetForeground(wxSTC_C_NUMBER,                wxColor(255,128,0) );
+    m_CodeLog->StyleSetForeground(wxSTC_C_WORD,                  wxColor(0,0,255));
+	m_CodeLog->StyleSetBold(wxSTC_C_WORD,true);
+    m_CodeLog->StyleSetForeground(wxSTC_C_STRING,                wxColor(128,128,128) );
+    m_CodeLog->StyleSetForeground(wxSTC_C_CHARACTER,             wxColor(128,128,128) );
+    m_CodeLog->StyleSetForeground(wxSTC_C_PREPROCESSOR,          wxColor(128,64,0) );
+    m_CodeLog->StyleSetForeground(wxSTC_C_OPERATOR,              wxColor(0,0,128));
+	m_CodeLog->StyleSetBold(wxSTC_C_OPERATOR,true);
+    m_CodeLog->StyleSetForeground(wxSTC_C_REGEX,                 wxColor(0,0,0) );
+    m_CodeLog->StyleSetForeground(wxSTC_C_COMMENTLINEDOC,        wxColor(0,128,128));
+    m_CodeLog->StyleSetForeground(wxSTC_C_WORD2,                 wxColor(128,0,255));
+    m_CodeLog->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORD,     wxColor(0,128,128));
+    m_CodeLog->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORDERROR,wxColor(0,128,128) );
+    m_CodeLog->SetProperty("lexer.cpp.track.preprocessor","0");
+    m_CodeLog->SetExtraAscent(1);
+    m_CodeLog->SetExtraDescent(1);
+
+    m_CodeLog->Show(false);
+    m_mgr.DetachPane(m_CodeLog);
+
+
+
+    m_mgr.LoadPerspective("layout2|name=m_scintilla1;caption=;state=768;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=196;besth=79;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_propgrid;caption=;state=392;dir=2;layer=0;row=0;pos=0;prop=100000;bestw=450;besth=-1;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_EventLog;caption=Event Log;state=6292988;dir=3;layer=0;row=3;pos=0;prop=100000;bestw=96;besth=76;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_browser;caption=Scintilla Documentation;state=6292988;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=-1;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_STCDoc;caption=wxStyledTextCtrl Documentation;state=6292988;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=16;besth=16;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=198|dock_size(2,0,0)=443|dock_size(3,0,3)=120|dock_size(3,0,0)=180|",true);
+
 
     //m_mgr.LoadPerspective("layout2|name=m_scintilla1;caption=;state=444;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=196;besth=79;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_propgrid;caption=;state=396;dir=2;layer=0;row=0;pos=0;prop=100000;bestw=400;besth=-1;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_browser;caption=;state=12584876;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=-1;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=m_STCDoc;caption=;state=14682108;dir=3;layer=0;row=0;pos=1;prop=100000;bestw=16;besth=16;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=196|dock_size(2,0,0)=450|dock_size(3,0,0)=180|",true);
 
@@ -350,6 +387,13 @@ void propgridtest03Frame::onAuiPaneClose( wxAuiManagerEvent& event )
         stcDocInfo = m_mgr.GetPane(m_STCDoc);
         toBeDetached=m_STCDoc;
     }
+    else if( pi->name=="m_CodeLog" )
+    {
+        m_menuItem36->Check(false);
+        stcDocInfo = m_mgr.GetPane(m_CodeLog);
+        toBeDetached=m_CodeLog;
+    }
+
 
     this->Connect( wxEVT_IDLE, wxIdleEventHandler( propgridtest03Frame::onIdleDetach ) );
 
@@ -368,6 +412,30 @@ void propgridtest03Frame::onIdleDetach( wxIdleEvent& event )
     }
 
     this->Disconnect( wxEVT_IDLE, wxIdleEventHandler( propgridtest03Frame::onIdleDetach ) );
+}
+
+void propgridtest03Frame::OnShowCode( wxCommandEvent& event )
+{
+    wxMenuItem* mi=m_menu1->FindItem( event.GetId() );
+
+    if(mi->IsChecked())
+    {
+        m_CodeLog->Show(true);
+        codeLogInfo.MaximizeButton(false);
+        codeLogInfo.CloseButton(false);
+        m_mgr.InsertPane(m_CodeLog, codeLogInfo);
+    }
+    else
+    {
+        codeLogInfo = m_mgr.GetPane(m_CodeLog);
+        m_mgr.DetachPane(m_CodeLog);
+        m_CodeLog->Show(false);
+    }
+
+    m_mgr.Update();
+
+
+
 }
 
 void propgridtest03Frame::onViewEventLog(wxCommandEvent& event)
@@ -449,6 +517,8 @@ void propgridtest03Frame::setColorString(wxPGProperty* property, const wxColor& 
 
     property->SetValueImage(test_bitmap);
 }
+
+
 
 
 void propgridtest03Frame::On3rdColumnMenu( wxCommandEvent& event )

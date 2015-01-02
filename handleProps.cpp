@@ -437,6 +437,475 @@ wxString MyProjectMyDialog3::GetKeyName(const wxKeyEvent &event)
 //    return (int) l;
 //}
 
+
+void appendSearchFlags(wxString& cl,long l3)
+{
+    bool found(false);
+    if((l3&wxSTC_FIND_WHOLEWORD)==wxSTC_FIND_WHOLEWORD)
+    {
+        cl<< "wxSTC_FIND_WHOLEWORD";
+        found=true;
+    }
+    if((l3&wxSTC_FIND_MATCHCASE)==wxSTC_FIND_MATCHCASE)
+    {
+        cl << (found?"|":"");
+        cl<< "wxSTC_FIND_MATCHCASE";
+        found=true;
+    }
+    if((l3&wxSTC_FIND_WORDSTART)==wxSTC_FIND_WORDSTART)
+    {
+        cl << (found?"|":"");
+        cl<< "wxSTC_FIND_WORDSTART";
+        found=true;
+    }
+    if((l3&wxSTC_FIND_REGEXP)==wxSTC_FIND_REGEXP)
+    {
+        cl << (found?"|":"");
+        cl<< "wxSTC_FIND_REGEXP";
+        found=true;
+    }
+    if((l3&wxSTC_FIND_POSIX)==wxSTC_FIND_POSIX)
+    {
+        cl << (found?"|":"");
+        cl<< "wxSTC_FIND_POSIX";
+        found=true;
+    }
+    cl << (found?"":"0");
+}
+
+void stringSetter(wxStyledTextCtrl* m_CodeLog,const wxString& command,const wxString& s)
+{
+    wxString cl = command;
+    cl << "(\"";
+    cl << s;
+    cl << "\");\n";
+    m_CodeLog->AppendText(cl);
+}
+
+void intSetter(wxStyledTextCtrl* m_CodeLog,const wxString& command,int i1)
+{
+    wxString cl = command;
+    cl << "(";
+    cl << i1;
+    cl << ");\n";
+    m_CodeLog->AppendText(cl);
+}
+
+void intStringSetter(wxStyledTextCtrl* m_CodeLog,const wxString& command,int i1,const wxString& s)
+{
+    wxString cl = command;
+    cl << "(";
+    cl << i1;
+    cl << ",\"";
+    cl << s;
+    cl << "\");\n";
+    m_CodeLog->AppendText(cl);
+}
+
+void twoIntSetter(wxStyledTextCtrl* m_CodeLog,const wxString& command,int i1,int i2)
+{
+    wxString cl = command;
+    cl << "(";
+    cl << i1;
+    cl << ",";
+    cl << i2;
+    cl << ");\n";
+    m_CodeLog->AppendText(cl);
+}
+
+void boolSetter(wxStyledTextCtrl* m_CodeLog,const wxString& command,bool b)
+{
+    wxString cl = command;
+    cl << "(";
+    cl << (b?"true":"false");
+    cl << ");\n";
+    m_CodeLog->AppendText(cl);
+}
+
+void appendOrOverwrite(wxStyledTextCtrl* m_CodeLog,const wxString& code,const wxString& cstart)
+{
+    size_t len = cstart.Len();
+    int lines = m_CodeLog->GetLineCount();
+
+    if(lines==1)
+    {
+        m_CodeLog->AppendText(code);
+        //stc->AppendText("chose option 1\n");
+        return;
+    }
+
+    int fp = m_CodeLog->PositionFromLine(lines-2);
+    int lp = m_CodeLog->PositionFromLine(lines-1);
+
+    wxString s = m_CodeLog->GetTextRange(fp,lp);
+
+    //stc->AppendText(wxString::Format("fp:%d\tlp:%d\n",fp,lp));
+
+    //stc->AppendText(cstart+"\n");
+
+    //stc->AppendText(s.Left(len)+"\n");
+
+    if(s.Left(len) == cstart)
+    {
+        //int lines = m_CodeLog->GetLineCount();
+
+
+        m_CodeLog->SetSelectionStart(fp);
+        m_CodeLog->SetSelectionEnd (lp);
+
+        m_CodeLog->ReplaceSelection(code);
+
+        //stc->AppendText("chose option 2\n");
+    }
+    else
+    {
+        m_CodeLog->AppendText(code);
+        //stc->AppendText("chose option 3\n");
+    }
+}
+
+void appendOrOverwriteBoolColor(wxStyledTextCtrl* m_CodeLog,const wxString& cstart,bool b, const wxColor& col)
+{
+    wxString cl = cstart;
+    cl << "(";
+    cl << (b?"true":"false");
+    cl << ", wxColour(";
+    cl << (int) col.Red();
+    cl << ",";
+    cl << (int) col.Green();
+    cl << ",";
+    cl << (int) col.Blue();
+    cl << ") );\n";
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+void appendOrOverwriteColor(wxStyledTextCtrl* m_CodeLog,const wxString& cstart, const wxColor& col)
+{
+    wxString cl = cstart;
+    cl << "( wxColour(";
+    cl << (int) col.Red();
+    cl << ",";
+    cl << (int) col.Green();
+    cl << ",";
+    cl << (int) col.Blue();
+    cl << ") );\n";
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+void appendOrOverwriteBool(wxStyledTextCtrl* m_CodeLog,const wxString& cstart,bool b)
+{
+    wxString cl = cstart;
+    cl << "(";
+    cl << (b?"true":"false");
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+void appendOrOverwriteString(wxStyledTextCtrl* m_CodeLog,const wxString& cstart,const wxString& s)
+{
+    wxString cl = cstart;
+    cl << "(\"";
+    cl << s;
+    cl << "\");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+void appendOrOverwriteInt(wxStyledTextCtrl* m_CodeLog,const wxString& cstart,int i1)
+{
+    wxString cl = cstart;
+    cl << "(";
+    cl << i1;
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+void appendOrOverwriteIntInt(wxStyledTextCtrl* m_CodeLog,const wxString& cstart,int i1,int i2)
+{
+    wxString cl = cstart;
+    cl << "(";
+    cl << i1;
+    cl << ",";
+    cl << i2;
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+void appendOrOverwriteBoolInt(wxStyledTextCtrl* m_CodeLog,const wxString& cstart,bool b,int i1)
+{
+    wxString cl = cstart;
+    cl << "(";
+    cl << (b?"true":"false");
+    cl << ",";
+    cl << i1;
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+void appendOrOverwriteIntString(wxStyledTextCtrl* m_CodeLog,const wxString& cstart,int i1,const wxString& s)
+{
+    wxString cl = cstart;
+    cl << "(";
+    cl << i1;
+    cl << ",\"";
+    cl << s;
+    cl << "\");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cstart);
+}
+
+
+wxString styleNoOrLable(wxPropertyGrid* m_propgrid, wxPGProperty * property)
+{
+    myStyleData* msd = dynamic_cast<myStyleData*>(property->GetParent()->GetClientObject());
+    int i = msd->get_style();
+    wxString s = m_propgrid->GetPropertyLabel(property->GetParent());
+
+    wxString cl = "";
+    //cl << msd->get_style();
+    //wxString s = m_propgrid->GetPropertyLabel(property);
+    if(s.Left(6) == "style " || s.Left(7) == "Margin " || s.Left(7) == "Marker "|| s.Left(10) == "indicator " )
+    {
+        cl << i;
+    }
+    else if(s.Find("(Marker ")!=wxNOT_FOUND)
+    {
+        wxString temp=s;
+        wxString temp2 = " (Marker ";
+
+        size_t l = temp.length();
+        size_t l2 = temp2.length();
+        int f = temp.Find (temp2);
+
+        cl << temp.Left(f);
+    }
+    else
+    {
+        wxString temp=s;
+        wxString temp2 = " - (style ";
+
+        size_t l = temp.length();
+        size_t l2 = temp2.length();
+        int f = temp.Find (temp2);
+
+        cl << temp.Left(f);
+    }
+    return cl;
+}
+
+void styleStringSetter(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command,const wxString& prop)
+{
+    wxString cl = command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl2=cl;
+    cl << ",\"";
+    cl << prop;
+    cl << "\");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void styleBoolSetter(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command,bool b)
+{
+    wxString cl = command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ",";
+    cl2=cl;
+    cl << (b?"true":"false");
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void styleColorSetter(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command,const wxColor& col)
+{
+    wxString cl = command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ",";
+    cl2=cl;
+    cl << "wxColour(";
+    cl << (int)col.Red();
+    cl << ",";
+    cl << (int)col.Green();
+    cl << ",";
+    cl << (int)col.Blue();
+    cl << ") );\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+
+void styleBoolSetter2(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command)
+{
+    wxString cl = "m_stc->";
+    cl << command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ",";
+    cl2=cl;
+    cl << (property->GetValue().GetBool()?"true":"false");
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void styleIntSetter2(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command)
+{
+    wxString cl = "m_stc->";
+    cl << command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ",";
+    cl2=cl;
+    cl << (int)property->GetValue().GetLong();
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void styleColorSetter2(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command)
+{
+    wxAny value = property->GetValue();
+    wxColour col = value.As<wxColour>();
+
+    wxString cl = "m_stc->";
+    cl << command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ",";
+    cl2=cl;
+    cl << " wxColour(";
+    cl << (int) col.Red();
+    cl << ",";
+    cl << (int) col.Green();
+    cl << ",";
+    cl << (int) col.Blue();
+    cl << ") );\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void styleEnumSetter2(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command)
+{
+    wxString cl = "m_stc->";
+    cl << command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ",";
+    cl2=cl;
+    cl << property->ValueToString(property->GetValue());;
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+
+void styleIntSetter(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command,int i)
+{
+    wxString cl = command;
+    wxString cl2;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ",";
+    cl2=cl;
+    cl << i;
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void paramIntSetter(wxStyledTextCtrl* m_CodeLog,const wxString& command,int l1,int l2)
+{
+    wxString cl = "m_stc->";
+    cl << command;
+    wxString cl2;
+    cl << "(";
+    cl << l1;
+    cl << ",";
+    cl2=cl;
+    cl << l2;
+    cl << ");\n";
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void paramGetter(wxStyledTextCtrl* m_CodeLog,const wxString& command,int l1)
+{
+    wxString cl = "m_stc->";
+    cl << command;
+    wxString cl2;
+    cl << "(";
+    cl << l1;
+    cl2=cl;
+    cl << ");\n";
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void styleGetter(wxStyledTextCtrl* m_CodeLog,wxPropertyGrid* m_propgrid, wxPGProperty * property,const wxString& command)
+{
+    wxString cl = "m_stc->";
+    cl << command;
+    cl << "(";
+    cl << styleNoOrLable(m_propgrid, property);
+    cl << ");\n";
+    //m_CodeLog->AppendText(cl);
+    appendOrOverwrite(m_CodeLog,cl,cl);
+}
+
+void basicGetter(wxStyledTextCtrl* m_CodeLog,const wxString& command)
+{
+    wxString cl = "m_stc->";
+    cl << command;
+    cl << "();";
+    appendOrOverwrite(m_CodeLog,cl+"\n",cl);
+}
+
+void appendOrOverwrite2Enum(wxStyledTextCtrl* m_CodeLog,wxPGProperty* property, const wxString& command)
+{
+    wxString cl2 = "m_stc->";
+    cl2 << command;
+    cl2 << "(";
+    wxString cl = cl2;
+    cl << property->ValueToString(property->GetValue());
+    cl << ");\n";
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void appendOrOverwrite2Int(wxStyledTextCtrl* m_CodeLog,wxPGProperty* property, const wxString& command)
+{
+    wxString cl2 = "m_stc->";
+    cl2 << command;
+    cl2 << "(";
+    wxString cl = cl2;
+    cl << (int) property->GetValue().GetLong();
+    cl << ");\n";
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
+void appendOrOverwrite2Bool(wxStyledTextCtrl* m_CodeLog,wxPGProperty* property, const wxString& command)
+{
+    wxString cl2 = "m_stc->";
+    cl2 << command;
+    cl2 << "(";
+    wxString cl = cl2;
+    cl << (property->GetValue().GetBool()?"true":"false");
+    cl << ");\n";
+    appendOrOverwrite(m_CodeLog,cl,cl2);
+}
+
 bool propgridtest03Frame::handle_property(wxPGProperty* property)
 {
     int i = reinterpret_cast<int>(property->GetClientData());
@@ -452,36 +921,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
     switch(i)
     {
         case SCI_PARAM:
-            rv=false;
             break;
 
         case SCI_GETTEXT:
             {
                 property->SetValue( m_scintilla1->GetText() );
                 statusBar->SetStatusText("Text received.", 1);
-                rv=true;
 
-//                wxString stcnames,scinames;
-//                wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_ALL,property);
-//                int i;
-//
-//                while(!it.AtEnd())
-//                {
-//
-//                    i=reinterpret_cast<int>(it.GetProperty()->GetClientData());
-//
-//                    if(SCI_TEXTRETRIEVALANDMODIFICATION<=i && i<=SCI_GETIDENTIFIER )
-//                    {
-//                        if(it.GetProperty()->GetBaseName()!="zzz")
-//                        {
-//                            stcnames << it.GetProperty()->GetLabel() << "\n";
-//                            scinames << it.GetProperty()->GetBaseName() << "\n";
-//                        }
-//                    }
-//                    it++;
-//                }
-//
-//                m_scintilla1->SetText( stcnames + "\n\n" + scinames);
+                basicGetter(m_CodeLog,"GetText");
             }
             break;
 
@@ -491,7 +938,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 wxString s = it.GetProperty ()->GetValue();
                 m_scintilla1->SetText( s );
-                rv= false;
+
+                appendOrOverwriteString(m_CodeLog,"m_stc->SetText",s);
                 //m_scintilla1->SetText( m_mgr.SavePerspective() );
             }
             break;
@@ -499,7 +947,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 m_scintilla1->SetSavePoint();
                 statusBar->SetStatusText("Save point set.", 1);
-                rv=false;
+
+                basicGetter(m_CodeLog,"SetSavePoint");
             }
             break;
         case SCI_GETLINE:
@@ -509,7 +958,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty()->GetValue();
 
                 property->SetValueFromString( m_scintilla1->GetLine(l1) );
-                rv=true;
+
+                paramGetter(m_CodeLog,"GetLine",l1);
             }
             break;
         case SCI_REPLACESEL:
@@ -518,14 +968,16 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 wxString s = it.GetProperty ()->GetValue();
                 m_scintilla1->ReplaceSelection( s );
-                rv=false;
+
+                stringSetter(m_CodeLog,"m_stc->ReplaceSelection",s);
             }
             break;
         case SCI_SETREADONLY:
             {
                 bool b = property->GetValue();
                 m_scintilla1->SetReadOnly(b);
-                rv=false;
+
+                appendOrOverwrite2Bool(m_CodeLog,property,"SetReadOnly");
             }
             break;
         case SCI_GETREADONLY:
@@ -533,7 +985,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 bool b = m_scintilla1->GetReadOnly ();
 
                 property->SetValueFromString(b?"True":"False");
-                rv=true;
+
+                basicGetter(m_CodeLog,"GetReadOnly");
             }
             break;
         case SCI_GETTEXTRANGE:
@@ -545,7 +998,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty ()->GetValue();
 
                 property->SetValueFromString(m_scintilla1->GetTextRange (l1, l2));
-                rv=true;
+
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->GetTextRange",l1,l2);
             }
             break;
         case SCI_ALLOCATE:
@@ -557,7 +1011,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 m_scintilla1->Allocate( l1 );
 
                 statusBar->SetStatusText(wxString::Format("%d bytes allocated",l1), 1);
-                rv=true;
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->Allocate",l1);
             }
             break;
         case SCI_ADDTEXT:
@@ -567,23 +1022,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty ()->GetValue();
 
                 m_scintilla1->AddText(s);
-                rv=false;
+
+                appendOrOverwriteString(m_CodeLog,"m_stc->AddText",s);
             }
             break;
         case SCI_ADDSTYLEDTEXT:
             {
-                //MyProjectMyDialog2 md(this,MyProjectMyDialog2::SCI_ADDSTYLEDTEXT);
-
                 MyProjectMyDialog5 md( this, m_scintilla1->GetStyleBits(), 0, MyProjectMyDialog5::SCI_ADDSTYLEDTEXT );
-
-                //md.ShowModal();
-                //md.copyStyledText(m_scintilla1);
-
-
-
                 int i=md.ShowModal();
-
-
 
                 if(i==wxID_OK)
                 {
@@ -605,6 +1051,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 //                    styledText.Clear();
                     statusBar->SetStatusText("Styled text added", 1);
 
+                    m_CodeLog->AppendText("//code generation for AddStyledText not currently supported.\n");
+
                 }
                 rv=false;
             }
@@ -616,7 +1064,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty ()->GetValue();
 
                 m_scintilla1->AppendText(s);
-                rv=false;
+
+                stringSetter(m_CodeLog,"m_stc->AppendText",s);
             }
             break;
         case SCI_INSERTTEXT:
@@ -628,13 +1077,15 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty ()->GetValue();
 
                 m_scintilla1->InsertText (l1, s);
-                rv=false;
+
+                intStringSetter(m_CodeLog,"m_stc->InsertText",l1,s);
             }
             break;
         case SCI_CLEARALL:
             {
                 m_scintilla1->ClearAll ();
-                rv=false;
+
+                basicGetter(m_CodeLog,"ClearAll");
             }
             break;
         case SCI_DELETERANGE:
@@ -646,14 +1097,16 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty ()->GetValue();
 
                 m_scintilla1->DeleteRange (l1, l2);
-                rv=false;
+
+                twoIntSetter(m_CodeLog,"m_stc->DeleteRange",l1,l2);
             }
             break;
         case SCI_CLEARDOCUMENTSTYLE:
             {
                 m_scintilla1->ClearDocumentStyle();
+
+                basicGetter(m_CodeLog,"ClearDocumentStyle");
                 statusBar->SetStatusText("All style bits cleared.", 1);
-                rv=false;
             }
             break;
         case SCI_GETCHARAT:
@@ -673,7 +1126,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(s);
                 }
 
-                rv=true;
+                paramGetter(m_CodeLog,"GetCharAt",l1);
             }
             break;
         case SCI_GETSTYLEAT:
@@ -683,23 +1136,6 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty ()->GetValue();
 
                 int i = m_scintilla1->GetStyleAt (l1);
-
-
-//                wxString s="";
-//
-//                for(int j=0;j<8;j++)
-//                {
-//                    if(i&(1<<j))
-//                    {
-//                        s.Prepend("1");
-//                    }
-//                    else
-//                    {
-//                        s.Prepend("0");
-//                    }
-//                }
-
-
 
                 int mask=0;
                 int sb = m_scintilla1->GetStyleBits();
@@ -730,7 +1166,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValue(s);
 
-                rv=true;
+                paramGetter(m_CodeLog,"GetStyleAt",l1);
             }
             break;
         case SCI_GETSTYLEDTEXT:
@@ -752,19 +1188,20 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 md.SetReadOnly();
                 md.ShowModal();
 
-                rv=false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->GetStyledText",l1,l2);
             }
             break;
         case SCI_SETSTYLEBITS:
             {
                 m_scintilla1->SetStyleBits( property->GetValue().GetLong() );
-                rv=false;
+
+                appendOrOverwrite2Int(m_CodeLog,property,"SetStyleBits");
             }
             break;
         case SCI_GETSTYLEBITS:
             {
                 property->SetValue(wxString::Format( "%d",m_scintilla1->GetStyleBits() ));
-                rv= true;
+                basicGetter(m_CodeLog,"GetStyleBits");
             }
             break;
         case SCI_ACCESSTOENCODEDTEXT:
@@ -775,6 +1212,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
         case SCI_TARGETASUTF8:
             {
                 property->SetValueFromInt( m_scintilla1->SendMsg(2447,0,0) );
+
+                m_CodeLog->AppendText("//code generation for SCI_TARGETASUTF8 is not currently supported.\n");
                 rv= false;
             }
             break;
@@ -788,12 +1227,18 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 //property->SetValue(wxString::Format( "%d",m_scintilla1->GetStyleBits() ));
                 property->SetValueFromInt( m_scintilla1->SendMsg(2449,(sptr_t)c,0) );
+
+                m_CodeLog->AppendText("//code generation for SCI_ENCODEDFROMUTF8 is not currently supported.\n");
+
                 rv= false;
             }
             break;
         case SCI_SETLENGTHFORENCODE:
             {
                 m_scintilla1->SendMsg(2448,0,0);
+
+                m_CodeLog->AppendText("//code generation for SCI_SETLENGTHFORENCODE is not currently supported.\n");
+
                 rv= false;
             }
             break;
@@ -825,13 +1270,16 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SendMsg(2162, 0, (sptr_t)&tr);
 
                     property->SetValueFromString(wxString(buf,needed_len-1));
+
                 }
                 else
                 {
                     property->SetValueFromString(m_scintilla1->GetTextRange(cpMin,cpMax));
                 }
 
-                rv= true;
+                m_CodeLog->AppendText("//code generation for SCI_GETTEXTRANGEALT is not currently supported.\n");
+
+                rv= false;
             }
             break;
 
@@ -857,13 +1305,28 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValue(wxString::Format("%d",m_scintilla1->FindText(l1, l2, s, l3)));
 
-                rv=true;
+                wxString cl = "m_stc->FindText(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ",\"";
+                cl << s;
+                cl << "\",";
+                appendSearchFlags(cl,l3);
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
+
+                rv=false;
+                //rv=true;
             }
             break;
         case SCI_SEARCHANCHOR:
             {
                 m_scintilla1->SearchAnchor();
                 statusBar->SetStatusText("The search anchor has been set.", 1);
+
+                m_CodeLog->AppendText("m_stc->SearchAnchor();\n");
                 rv=false;
             }
             break;
@@ -878,7 +1341,16 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValue(wxString::Format("%d",m_scintilla1->SearchNext(l1, s)));
 
-                rv=true;
+                wxString cl = "m_stc->SearchNext(";
+                appendSearchFlags(cl,l1);
+                cl << ",\"";
+                cl << s;
+                cl << "\");\n";
+
+                m_CodeLog->AppendText(cl);
+                rv=false;
+
+                //rv=true;
             }
             break;
         case SCI_SEARCHPREV:
@@ -892,43 +1364,94 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValue(wxString::Format("%d",m_scintilla1->SearchPrev(l1, s)));
 
-                rv=true;
+                wxString cl = "m_stc->SearchPrev(";
+                appendSearchFlags(cl,l1);
+                cl << ",\"";
+                cl << s;
+                cl << "\");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
+
+                //rv=true;
             }
             break;
         case SCI_SETTARGETSTART:
             {
-                m_scintilla1->SetTargetStart( property->GetValue().GetLong() );
-                rv= false;
+                long l1 = property->GetValue().GetLong();
+
+                m_scintilla1->SetTargetStart( l1 );
+
+                wxString cl = "m_stc->SetTargetStart(";
+                cl << (int) l1;
+                cl << ");\n";
+                //m_CodeLog->AppendText(cl);
+
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetTargetStart(");
+
+                rv=false;
+
+                //rv= false;
             }
             break;
         case SCI_GETTARGETSTART:
             {
                 property->SetValue( wxString::Format( "%d",m_scintilla1->GetTargetStart() ) );
-                rv= true;
+
+                m_CodeLog->AppendText("m_stc->GetTargetStart();\n");
+                rv=false;
+
+                //rv= true;
             }
             break;
         case SCI_SETTARGETEND:
             {
-                m_scintilla1->SetTargetEnd( property->GetValue().GetLong() );
-                rv= false;
+                long l1 = property->GetValue().GetLong();
+
+                m_scintilla1->SetTargetEnd( l1 );
+
+                wxString cl = "m_stc->SetTargetEnd(";
+                cl << (int) l1;
+                cl << ");\n";
+                //m_CodeLog->AppendText(cl);
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetTargetEnd(");
+                rv=false;
+
+                //rv= false;
             }
             break;
         case SCI_GETTARGETEND:
             {
                 property->SetValue( wxString::Format( "%d",m_scintilla1->GetTargetEnd() ) );
-                rv= true;
+
+                m_CodeLog->AppendText("m_stc->GetTargetEnd();\n");
+                rv=false;
+
+                //rv= true;
             }
             break;
         case SCI_TARGETFROMSELECTION:
             {
                 m_scintilla1->TargetFromSelection();
                 statusBar->SetStatusText("The target has been set from the current selection.", 1);
+
+                m_CodeLog->AppendText("m_stc->TargetFromSelection();\n");
                 rv=false;
+
+                //rv=false;
             }
             break;
         case SCI_SETSEARCHFLAGS:
             {
-                m_scintilla1->SetSearchFlags( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+
+                m_scintilla1->SetSearchFlags( l1 );
+
+                wxString cl = "m_stc->SetSearchFlags(";
+                appendSearchFlags(cl,l1);
+                cl << ");\n";
+                //m_CodeLog->AppendText(cl);
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetSearchFlags(");
+
                 rv=false;
             }
             break;
@@ -970,7 +1493,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv= true;
+
+                m_CodeLog->AppendText("m_stc->GetSearchFlags();\n");
+                rv=false;
+
+                //rv= true;
             }
             break;
         case SCI_SEARCHINTARGET:
@@ -980,7 +1507,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty ()->GetValue();
 
                 property->SetValueFromString( wxString::Format("%d",m_scintilla1->SearchInTarget(s) ));
-                rv=true;
+
+                wxString cl = "m_stc->SearchInTarget(\"";
+                cl << s;
+                cl << "\");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
+                //rv=true;
             }
             break;
         case SCI_REPLACETARGET:
@@ -990,7 +1523,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty ()->GetValue();
 
                 property->SetValueFromString( wxString::Format("%d",m_scintilla1->ReplaceTarget(s) ));
-                rv=true;
+
+                wxString cl = "m_stc->ReplaceTarget(\"";
+                cl << s;
+                cl << "\");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
+
+                //rv=true;
             }
             break;
         case SCI_REPLACETARGETRE:
@@ -1000,7 +1540,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty ()->GetValue();
 
                 property->SetValueFromString( wxString::Format("%d",m_scintilla1->ReplaceTargetRE(s) ));
-                rv=true;
+
+                wxString cl = "m_stc->ReplaceTargetRE(\"";
+                cl << s;
+                cl << "\");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
+
+                //rv=true;
             }
             break;
         case SCI_GETTAG:
@@ -1008,8 +1555,17 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
                 it++;
 
-                property->SetValueFromString( m_scintilla1->GetTag( it.GetProperty ()->GetValue().GetLong() ) );
-                rv=true;
+                long l1 = it.GetProperty ()->GetValue().GetLong();
+
+                property->SetValueFromString( m_scintilla1->GetTag( l1 ) );
+
+                wxString cl = "m_stc->GetTag(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
+
+                //rv=true;
             }
             break;
 
@@ -1018,14 +1574,24 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             break;
         case SCI_SETOVERTYPE:
             {
-                m_scintilla1->SetOvertype( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+
+                m_scintilla1->SetOvertype( b );
+
+                wxString cl = "m_stc->SetOvertype(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETOVERTYPE:
             {
                 property->SetValueFromString(m_scintilla1->GetOvertype()?"True":"False");
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetOvertype();\n");
+                rv=false;
+                //rv=true;
             }
             break;
 
@@ -1035,6 +1601,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
         case SCI_CUT:
             {
                 m_scintilla1->Cut();
+
+                appendOrOverwrite(m_CodeLog,"m_scintilla1->Cut();\n","m_scintilla1->Cut();\n");
                 rv=false;
             }
             break;
@@ -1042,25 +1610,33 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 m_scintilla1->Copy();
                 statusBar->SetStatusText("Selection copied to clipboard.", 1);
+
+                appendOrOverwrite(m_CodeLog,"m_scintilla1->Copy();\n","m_scintilla1->Copy();\n");
                 rv=false;
             }
             break;
         case SCI_PASTE:
             {
                 m_scintilla1->Paste();
+
+                appendOrOverwrite(m_CodeLog,"m_scintilla1->Paste();\n","m_scintilla1->Paste();\n");
                 rv=false;
             }
             break;
         case SCI_CLEAR:
             {
                 m_scintilla1->Clear();
+
+                appendOrOverwrite(m_CodeLog,"m_scintilla1->Clear();\n","m_scintilla1->Clear();\n");
                 rv=false;
             }
             break;
         case SCI_CANPASTE:
             {
                 property->SetValueFromString(m_scintilla1->CanPaste()?"True":"False");
-                rv=true;
+
+                m_CodeLog->AppendText("m_scintilla1->CanPaste();\n");
+                rv=false;
             }
             break;
         case SCI_COPYRANGE:
@@ -1073,6 +1649,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->CopyRange(l1,l2);
                 statusBar->SetStatusText("Range copied to clipboard.", 1);
+
+                wxString cl = "m_stc->CopyRange(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
@@ -1087,6 +1671,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 m_scintilla1->CopyText(l1,s);
                 statusBar->SetStatusText("Text copied to clipboard.", 1);
 
+                wxString cl = "m_stc->CopyText(";
+                cl << (int) l1;
+                cl << ",\"";
+                cl << s;
+                cl << "\");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
@@ -1094,19 +1685,32 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 m_scintilla1->CopyAllowLine();
                 statusBar->SetStatusText("Selection or current line copied to clipboard.", 1);
+
+                appendOrOverwrite(m_CodeLog,"m_scintilla1->CopyAllowLine();\n","m_scintilla1->CopyAllowLine();\n");
                 rv=false;
             }
             break;
         case SCI_SETPASTECONVERTENDINGS:
             {
-                m_scintilla1->SetPasteConvertEndings( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+
+                m_scintilla1->SetPasteConvertEndings( b );
+
+                wxString cl = "m_stc->SetPasteConvertEndings(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
         case SCI_GETPASTECONVERTENDINGS:
             {
                 property->SetValueFromString(m_scintilla1->GetPasteConvertEndings()?"True":"False");
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetPasteConvertEndings();\n");
+                rv=false;
+                //rv=true;
             }
             break;
 
@@ -1115,7 +1719,17 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             break;
         case SCI_SETSTATUS:
             {
-                m_scintilla1->SetStatus( property->GetValue().GetLong() );
+                long l1=property->GetValue().GetLong();
+
+                m_scintilla1->SetStatus( l1 );
+
+                wxString cl = "m_stc->SetStatus(";
+                if(l1==wxSTC_STATUS_OK) cl << "wxSTC_STATUS_OK";
+                else if(l1==wxSTC_STATUS_FAILURE) cl << "wxSTC_STATUS_FAILURE";
+                else cl << "wxSTC_STATUS_BADALLOC";
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
@@ -1142,7 +1756,10 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetStatus();\n");
+                rv=false;
+                //rv=true;
             }
             break;
 
@@ -1152,50 +1769,76 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
         case SCI_UNDO:
             {
                 m_scintilla1->Undo();
+
+                m_CodeLog->AppendText("m_stc->Undo();\n");
                 rv=false;
             }
             break;
         case SCI_CANUNDO:
             {
                 property->SetValueFromString(m_scintilla1->CanUndo()?"True":"False");
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->CanUndo();\n");
+                rv=false;
+
+                //rv=true;
             }
             break;
         case SCI_REDO:
             {
                 m_scintilla1->Redo ();
+
+                m_CodeLog->AppendText("m_stc->Redo();\n");
                 rv=false;
             }
             break;
         case SCI_CANREDO:
             {
                 property->SetValueFromString(m_scintilla1->CanRedo()?"True":"False");
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->CanRedo();\n");
+
+                rv=false;
+                //rv=true;
             }
             break;
         case SCI_EMPTYUNDOBUFFER:
             {
                 m_scintilla1->EmptyUndoBuffer();
                 statusBar->SetStatusText("The Undo buffer has been cleared.", 1);
+
+                m_CodeLog->AppendText("m_stc->EmptyUndoBuffer();\n");
                 rv=false;
             }
             break;
         case SCI_SETUNDOCOLLECTION:
             {
-                m_scintilla1->SetUndoCollection( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+
+                m_scintilla1->SetUndoCollection( b );
+
+                wxString cl = "m_stc->SetUndoCollection(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETUNDOCOLLECTION:
             {
                 property->SetValueFromString(m_scintilla1->GetUndoCollection()?"True":"False");
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetUndoCollection();\n");
+                rv=false;
+                //rv=true;
             }
             break;
         case SCI_BEGINUNDOACTION:
             {
                 m_scintilla1->BeginUndoAction();
                 statusBar->SetStatusText("Undo action begun.", 1);
+
+                m_CodeLog->AppendText("m_stc->BeginUndoAction();\n");
                 rv=false;
             }
             break;
@@ -1203,6 +1846,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 m_scintilla1->EndUndoAction();
                 statusBar->SetStatusText("Undo action finished.", 1);
+
+                m_CodeLog->AppendText("m_stc->EndUndoAction();\n");
                 rv=false;
             }
             break;
@@ -1226,53 +1871,76 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 statusBar->SetStatusText(msg, 1);
 
+
+                wxString cl = "m_stc->SetPasteConvertEndings(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (l2==wxSTC_UNDO_MAY_COALESCE?"wxSTC_UNDO_MAY_COALESCE":"0");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
 
         case SCI_SELECTIONANDINFORMATION:
-                rv=false;
+            rv=false;
             break;
         case SCI_GETTEXTLENGTH:
             {
                 property->SetValueFromInt(m_scintilla1->GetTextLength ());
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetTextLength();\n");
+                rv=false;
             }
             break;
         case SCI_GETLENGTH:
             {
                 property->SetValueFromInt(m_scintilla1->GetLength());
-                rv=true;
+                m_CodeLog->AppendText("m_stc->GetLength();\n");
+                rv=false;
             }
             break;
         case SCI_GETLINECOUNT:
             {
                 property->SetValueFromInt(m_scintilla1->GetLineCount());
-                rv=true;
+                m_CodeLog->AppendText("m_stc->GetLineCount();\n");
+                rv=false;
             }
             break;
         case SCI_SETFIRSTVISIBLELINE:
             {
-                m_scintilla1->SetFirstVisibleLine( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+
+                m_scintilla1->SetFirstVisibleLine( l1 );
+
+                wxString cl = "m_stc->SetFirstVisibleLine(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETFIRSTVISIBLELINE:
             {
                 property->SetValueFromInt(m_scintilla1->GetFirstVisibleLine());
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetFirstVisibleLine();\n");
+                rv=false;
             }
             break;
         case SCI_LINESONSCREEN:
             {
                 property->SetValueFromInt(m_scintilla1->LinesOnScreen());
-                rv=true;
+                m_CodeLog->AppendText("m_stc->LinesOnScreen();\n");
+                rv=false;
             }
             break;
         case SCI_GETMODIFY:
             {
                 property->SetValueFromString(m_scintilla1->GetModify()?"True":"False");
-                rv=true;
+                m_CodeLog->AppendText("m_stc->GetModify();\n");
+                rv=false;
             }
             break;
         case SCI_SETSEL:
@@ -1286,67 +1954,119 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 //m_scintilla1->SetSelection(l1,l2);
                 m_scintilla1->SendMsg(2160,l1,l2);
 
+                wxString cl = "m_stc->SendMsg(2160,";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GOTOPOS:
             {
-                m_scintilla1->GotoPos ( property->GetValue().GetLong() );
+                long l1=property->GetValue().GetLong();
+
+                m_scintilla1->GotoPos ( l1 );
+
+                wxString cl = "m_stc->GotoPos(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
         case SCI_GOTOLINE:
             {
-                m_scintilla1->GotoLine( property->GetValue().GetLong() );
+                long l1=property->GetValue().GetLong();
+                m_scintilla1->GotoLine( l1 );
+
+                wxString cl = "m_stc->GotoLine(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
         case SCI_SETCURRENTPOS:
             {
-                m_scintilla1->SetCurrentPos( property->GetValue().GetLong() );
+                long l1=property->GetValue().GetLong();
+                m_scintilla1->SetCurrentPos( l1 );
+
+                wxString cl = "m_stc->SetCurrentPos(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+
                 rv=false;
             }
             break;
         case SCI_GETCURRENTPOS:
             {
                 property->SetValueFromInt( m_scintilla1->GetCurrentPos() );
-                rv=true;
+				m_CodeLog->AppendText("m_stc->GetCurrentPos();\n");
+                rv=false;
             }
             break;
         case SCI_SETANCHOR:
             {
-                m_scintilla1->SetAnchor( property->GetValue().GetLong() );
+                long l1= property->GetValue().GetLong();
+                m_scintilla1->SetAnchor( l1 );
+
+                wxString cl = "m_stc->SetAnchor(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETANCHOR:
             {
                 property->SetValueFromInt( m_scintilla1->GetAnchor() );
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetAnchor();\n");
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONSTART:
             {
-                m_scintilla1->SetSelectionStart( property->GetValue().GetLong() );
+                long l1= property->GetValue().GetLong();
+                m_scintilla1->SetSelectionStart( l1 );
+
+                wxString cl = "m_stc->SetSelectionStart(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETSELECTIONSTART:
             {
                 property-> SetValueFromInt( m_scintilla1->GetSelectionStart() );
-                rv=true;
+
+                m_CodeLog->AppendText("m_stc->GetSelectionStart();\n");
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONEND:
             {
-                m_scintilla1->SetSelectionEnd( property->GetValue().GetLong() );
+                long l1= property->GetValue().GetLong();
+                m_scintilla1->SetSelectionEnd( l1 );
+
+                wxString cl = "m_stc->SetSelectionEnd(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETSELECTIONEND:
             {
                 property->SetValueFromInt ( m_scintilla1->GetSelectionEnd() );
-                rv=true;
+                m_CodeLog->AppendText("m_stc->GetSelectionEnd();\n");
+                rv=false;
             }
             break;
         case SCI_SETEMPTYSELECTION:
@@ -1357,12 +2077,17 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->SetEmptySelection(l1);
 
+                wxString cl = "m_stc->SetEmptySelection(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_SELECTALL:
             {
                 m_scintilla1->SelectAll();
+				m_CodeLog->AppendText("m_stc->SelectAll();\n");
                 rv=false;
             }
             break;
@@ -1372,7 +2097,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l1 = it.GetProperty ()->GetValue();
                 property->SetValueFromInt ( m_scintilla1->LineFromPosition(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->LineFromPosition(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_POSITIONFROMLINE:
@@ -1381,7 +2111,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l1 = it.GetProperty ()->GetValue();
                 property->SetValueFromInt ( m_scintilla1->PositionFromLine(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->PositionFromLine(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_GETLINEENDPOSITION:
@@ -1390,7 +2125,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l1 = it.GetProperty ()->GetValue();
                 property->SetValueFromInt ( m_scintilla1->GetLineEndPosition(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetLineEndPosition(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_LINELENGTH:
@@ -1399,14 +2139,20 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l1 = it.GetProperty ()->GetValue();
                 property->SetValueFromInt ( m_scintilla1->LineLength(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->LineLength(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
 
         case SCI_GETSELTEXT:
             {
                 property->SetValueFromString( m_scintilla1->GetSelectedText() );
-                rv=true;
+				m_CodeLog->AppendText("m_stc->GetSelectedText();\n");
+                rv=false;
             }
             break;
         case SCI_GETCURLINE:
@@ -1415,18 +2161,33 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = m_scintilla1->GetCurLine(&linePos);
                 property->SetValueFromString( wxString::Format("The caret is at position %d in the line \"%s\"",linePos,s) );
 
-                rv=true;
+                m_CodeLog->AppendText("//code generation for GetCurLine is not currently implimented.\n");
+                m_CodeLog->AppendText("//you would need to have an int variable and then pass a reference to that variable to the method.\n");
+                m_CodeLog->AppendText("//something like the following:\n");
+                m_CodeLog->AppendText("//int linePos;\n");
+                m_CodeLog->AppendText("//m_stc->GetCurLine(&linePos);\n");
+                rv=false;
             }
             break;
         case SCI_SELECTIONISRECTANGLE:
             {
                 property->SetValueFromString(m_scintilla1->SelectionIsRectangle()?"True":"False");
-                rv=true;
+				m_CodeLog->AppendText("m_stc->SelectionIsRectangle();\n");
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONMODE:
             {
-                m_scintilla1->SetSelectionMode( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetSelectionMode( l1 );
+
+                wxString cl = "m_stc->SetSelectionMode(";
+                if(l1==wxSTC_SEL_STREAM)         cl << "wxSTC_SEL_STREAM";
+                else if(l1==wxSTC_SEL_RECTANGLE) cl << "wxSTC_SEL_RECTANGLE";
+                else if(l1==wxSTC_SEL_LINES)     cl << "wxSTC_SEL_LINES";
+                else                             cl << "wxSTC_SEL_THIN";
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1455,7 +2216,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString("(unknown selection mode)");
                 }
 
-                rv=true;
+				m_CodeLog->AppendText("m_stc->GetSelectionMode();\n");
+                rv=false;
             }
             break;
         case SCI_GETLINESELSTARTPOSITION:
@@ -1475,7 +2237,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromInt(i);
                 }
 
-                rv=true;
+                wxString cl = "m_stc->GetLineSelStartPosition(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_GETLINESELENDPOSITION:
@@ -1495,12 +2261,17 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromInt(i);
                 }
 
-                rv=true;
+                wxString cl = "m_stc->GetLineSelEndPosition(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_MOVECARETINSIDEVIEW:
             {
                 m_scintilla1->MoveCaretInsideView ();
+				m_CodeLog->AppendText("m_stc->MoveCaretInsideView();\n");
                 rv=false;
             }
             break;
@@ -1514,7 +2285,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->WordEndPosition(l1,b) );
 
-                rv=true;
+                wxString cl = "m_stc->WordEndPosition(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_WORDSTARTPOSITION:
@@ -1527,7 +2304,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->WordStartPosition(l1,b) );
 
-                rv=true;
+                wxString cl = "m_stc->WordStartPosition(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_POSITIONBEFORE:
@@ -1538,7 +2321,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->PositionBefore(l1) );
 
-                rv=true;
+                wxString cl = "m_stc->PositionBefore(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_POSITIONAFTER:
@@ -1549,7 +2336,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->PositionAfter(l1) );
 
-                rv=true;
+                wxString cl = "m_stc->PositionAfter(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_COUNTCHARACTERS:
@@ -1562,7 +2353,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->CountCharacters(l1,l2) );
 
-                rv=true;
+                wxString cl = "m_stc->CountCharacters(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_TEXTWIDTH:
@@ -1575,7 +2372,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->TextWidth(l1,s) );
 
-                rv=true;
+                wxString cl = "m_stc->TextWidth(";
+                cl << (int) l1;
+                cl << ",\"";
+                cl << s;
+                cl << "\");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_TEXTHEIGHT:
@@ -1586,7 +2389,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->TextHeight(l1) );
 
-                rv=true;
+                wxString cl = "m_stc->TextHeight(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
 
@@ -1596,7 +2403,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l1=it.GetProperty ()->GetValue();
                 property->SetValueFromInt( m_scintilla1->GetColumn(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetColumn(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_FINDCOLUMN:
@@ -1607,7 +2419,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l2=it.GetProperty ()->GetValue();
                 property->SetValueFromInt( m_scintilla1->FindColumn(l1,l2) );
-                rv=true;
+
+                wxString cl = "m_stc->FindColumn(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_POSITIONFROMPOINT:
@@ -1618,7 +2437,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l2=it.GetProperty ()->GetValue();
                 property->SetValueFromInt( m_scintilla1->PositionFromPoint(wxPoint(l1,l2)) );
-                rv=true;
+
+                wxString cl = "m_stc->PositionFromPoint(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_POSITIONFROMPOINTCLOSE:
@@ -1629,7 +2455,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l2=it.GetProperty ()->GetValue();
                 property->SetValueFromInt( m_scintilla1->PositionFromPointClose(l1,l2) );
-                rv=true;
+
+                wxString cl = "m_stc->PositionFromPointClose(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_CHARPOSITIONFROMPOINT:
@@ -1640,7 +2473,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l2=it.GetProperty ()->GetValue();
                 property->SetValueFromInt( m_scintilla1->CharPositionFromPoint(l1,l2) );
-                rv=true;
+
+                wxString cl = "m_stc->CharPositionFromPoint(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_CHARPOSITIONFROMPOINTCLOSE:
@@ -1651,7 +2491,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 long l2=it.GetProperty ()->GetValue();
                 property->SetValueFromInt( m_scintilla1->CharPositionFromPointClose(l1,l2) );
-                rv=true;
+
+                wxString cl = "m_stc->CharPositionFromPointClose(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_POINTXFROMPOSITION:
@@ -1661,7 +2508,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->SendMsg(2164,0,l1) );
-                rv=true;
+
+                wxString cl = "m_stc->SendMsg(2164,0,";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
 
 //                wxPoint p = m_scintilla1->PointFromPosition(l1);
 //
@@ -1676,30 +2528,45 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->SendMsg(2165,0,l1) );
-                rv=true;
+
+                wxString cl = "m_stc->SendMsg(2165,0,";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_HIDESELECTION:
             {
-                m_scintilla1->HideSelection( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->HideSelection( b );
+
+                wxString cl = "m_stc->SetPasteConvertEndings(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_CHOOSECARETX:
             {
                 m_scintilla1->ChooseCaretX();
+
+				m_CodeLog->AppendText("m_stc->ChooseCaretX();\n");
                 rv=false;
             }
             break;
         case SCI_MOVESELECTEDLINESUP:
             {
                 m_scintilla1->MoveSelectedLinesUp();
+				m_CodeLog->AppendText("m_stc->MoveSelectedLinesUp();\n");
                 rv=false;
             }
             break;
         case SCI_MOVESELECTEDLINESDOWN:
             {
                 m_scintilla1->MoveSelectedLinesDown();
+				m_CodeLog->AppendText("m_stc->MoveSelectedLinesDown();\n");
                 rv=false;
             }
             break;
@@ -1711,31 +2578,53 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             break;
         case SCI_SETMULTIPLESELECTION:
             {
-                m_scintilla1->SetMultipleSelection( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetMultipleSelection( b );
+
+                wxString cl = "m_stc->SetMultipleSelection(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETMULTIPLESELECTION:
             {
                 property->SetValueFromString(m_scintilla1->GetMultipleSelection()?"True":"False");
-                rv=true;
+				m_CodeLog->AppendText("m_stc->GetMultipleSelection();\n");
+                rv=false;
             }
             break;
         case SCI_SETADDITIONALSELECTIONTYPING:
             {
-                m_scintilla1->SetAdditionalSelectionTyping( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetAdditionalSelectionTyping( b );
+
+                wxString cl = "m_stc->SetAdditionalSelectionTyping(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETADDITIONALSELECTIONTYPING:
             {
                 property->SetValueFromString(m_scintilla1->GetAdditionalSelectionTyping()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetAdditionalSelectionTyping();\n");
+                rv=false;
             }
             break;
         case SCI_SETMULTIPASTE:
             {
+                long l1 = property->GetValue().GetLong();
                 m_scintilla1->SetMultiPaste( property->GetValue().GetLong() );
+
+                wxString cl = "m_stc->SetMultiPaste(";
+                if(l1==wxSTC_MULTIPASTE_ONCE) cl << "wxSTC_MULTIPASTE_ONCE";
+                else cl << "wxSTC_MULTIPASTE_EACH";
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1756,12 +2645,32 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString("(unknown multipaste mode");
                 }
 
-                rv=true;
+				m_CodeLog->AppendText("m_stc->GetMultiPaste();\n");
+                rv=false;
             }
             break;
         case SCI_SETVIRTUALSPACEOPTIONS:
             {
-                m_scintilla1->SetVirtualSpaceOptions( property->GetValue().GetLong() );
+                long l1=property->GetValue().GetLong();
+
+                m_scintilla1->SetVirtualSpaceOptions( l1 );
+
+                wxString cl = "m_stc->SetVirtualSpaceOptions(";
+				bool found(false);
+				if((l1&wxSTC_SCVS_RECTANGULARSELECTION)==wxSTC_SCVS_RECTANGULARSELECTION)
+				{
+					cl<< "wxSTC_SCVS_RECTANGULARSELECTION";
+					found=true;
+				}
+				if((l1&wxSTC_SCVS_USERACCESSIBLE)==wxSTC_SCVS_USERACCESSIBLE)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_SCVS_USERACCESSIBLE";
+					found=true;
+				}
+				cl << (found?"":"wxSTC_SCVS_NONE");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1798,11 +2707,50 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
+
+				m_CodeLog->AppendText("m_stc->GetVirtualSpaceOptions();\n");
+                rv=false;
             }
             break;
         case SCI_SETRECTANGULARSELECTIONMODIFIER:
             {
-                m_scintilla1->SetRectangularSelectionModifier( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetRectangularSelectionModifier( l1 );
+
+                wxString cl = "m_stc->SetRectangularSelectionModifier(";
+				bool found(false);
+				if((l1&wxSTC_SCMOD_SHIFT)==wxSTC_SCMOD_SHIFT)
+				{
+					cl<< "wxSTC_SCMOD_SHIFT";
+					found=true;
+				}
+				if((l1&wxSTC_SCMOD_CTRL)==wxSTC_SCMOD_CTRL)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_SCMOD_CTRL";
+					found=true;
+				}
+				if((l1&wxSTC_SCMOD_ALT)==wxSTC_SCMOD_ALT)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_SCMOD_ALT";
+					found=true;
+				}
+				if((l1&wxSTC_SCMOD_SUPER)==wxSTC_SCMOD_SUPER)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_SCMOD_SUPER";
+					found=true;
+				}
+				if((l1&wxSTC_SCMOD_META)==wxSTC_SCMOD_META)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_SCMOD_META";
+					found=true;
+				}
+				cl << (found?"":"wxSTC_SCMOD_NORM");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1856,18 +2804,25 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
+
+				m_CodeLog->AppendText("m_stc->GetRectangularSelectionModifier();\n");
+                rv=false;
             }
             break;
         case SCI_GETSELECTIONS:
             {
                 property->SetValueFromInt(m_scintilla1->GetSelections());
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetSelections();\n");
+                rv=false;
             }
             break;
         case SCI_CLEARSELECTIONS:
             {
                 m_scintilla1->ClearSelections();
                 statusBar->SetStatusText("Selections Cleared", 1);
+
+				m_CodeLog->AppendText("m_stc->ClearSelections();\n");
                 rv=false;
             }
             break;
@@ -1880,6 +2835,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SendMsg(2572, l1, l2);
+
+                wxString cl = "m_stc->SendMsg(2572,";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1892,19 +2854,34 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->AddSelection( l1, l2);
+
+                wxString cl = "m_stc->AddSelection(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_SETMAINSELECTION:
             {
-                m_scintilla1->SetMainSelection( property->GetValue().GetLong() );
+                long l1=property->GetValue().GetLong();
+                m_scintilla1->SetMainSelection( l1 );
+
+                wxString cl = "m_stc->SetMainSelection(";
+                cl << (int) l1;
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetMainSelection(");
                 rv=false;
             }
             break;
         case SCI_GETMAINSELECTION:
             {
                 property->SetValueFromInt( m_scintilla1->GetMainSelection() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetMainSelection();\n");
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONNCARET:
@@ -1916,6 +2893,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetSelectionNCaret( l1,l2 );
+
+                wxString cl = "m_stc->SetSelectionNCaret(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1926,7 +2910,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetSelectionNCaret(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetSelectionNCaret(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONNCARETVIRTUALSPACE:
@@ -1938,6 +2927,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetSelectionNCaretVirtualSpace( l1,l2 );
+
+                wxString cl = "m_stc->SetSelectionNCaretVirtualSpace(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1948,7 +2944,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetSelectionNCaretVirtualSpace(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetSelectionNCaretVirtualSpace(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONNANCHOR:
@@ -1960,6 +2961,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetSelectionNAnchor( l1,l2 );
+
+                wxString cl = "m_stc->SetSelectionNAnchor(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1970,7 +2978,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetSelectionNAnchor(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetSelectionNAnchor(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONNANCHORVIRTUALSPACE:
@@ -1982,6 +2995,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetSelectionNAnchorVirtualSpace( l1,l2 );
+
+                wxString cl = "m_stc->SetSelectionNAnchorVirtualSpace(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -1992,7 +3012,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetSelectionNAnchorVirtualSpace(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetSelectionNAnchorVirtualSpace(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONNSTART:
@@ -2004,6 +3029,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetSelectionNStart( l1,l2 );
+
+                wxString cl = "m_stc->SetSelectionNStart(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -2014,7 +3046,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetSelectionNStart(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetSelectionNStart(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_SETSELECTIONNEND:
@@ -2026,6 +3063,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetSelectionNEnd( l1,l2 );
+
+                wxString cl = "m_stc->SetSelectionNEnd(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -2036,7 +3080,12 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetSelectionNEnd(l1) );
-                rv=true;
+
+                wxString cl = "m_stc->GetSelectionNEnd(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
+                rv=false;
             }
             break;
         case SCI_SETRECTANGULARSELECTIONCARET:
@@ -2046,13 +3095,20 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetRectangularSelectionCaret( l1 );
+
+                wxString cl = "m_stc->SetRectangularSelectionCaret(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETRECTANGULARSELECTIONCARET:
             {
                 property->SetValueFromInt( m_scintilla1->GetRectangularSelectionCaret() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetRectangularSelectionCaret();\n");
+                rv=false;
             }
             break;
         case SCI_SETRECTANGULARSELECTIONCARETVIRTUALSPACE:
@@ -2062,13 +3118,20 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetRectangularSelectionCaretVirtualSpace( l1 );
+
+                wxString cl = "m_stc->SetRectangularSelectionCaretVirtualSpace(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE:
             {
                 property->SetValueFromInt( m_scintilla1->GetRectangularSelectionCaretVirtualSpace() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetRectangularSelectionCaretVirtualSpace();\n");
+                rv=false;
             }
             break;
         case SCI_SETRECTANGULARSELECTIONANCHOR:
@@ -2078,13 +3141,20 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetRectangularSelectionAnchor( l1 );
+
+                wxString cl = "m_stc->SetRectangularSelectionAnchor(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETRECTANGULARSELECTIONANCHOR:
             {
                 property->SetValueFromInt( m_scintilla1->GetRectangularSelectionAnchor() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetRectangularSelectionAnchor();\n");
+                rv=false;
             }
             break;
         case SCI_SETRECTANGULARSELECTIONANCHORVIRTUALSPACE:
@@ -2094,87 +3164,156 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetRectangularSelectionAnchorVirtualSpace( l1 );
+
+                wxString cl = "m_stc->SetRectangularSelectionAnchorVirtualSpace(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE:
             {
                 property->SetValueFromInt( m_scintilla1->GetRectangularSelectionAnchorVirtualSpace() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetRectangularSelectionAnchorVirtualSpace();\n");
+                rv=false;
             }
             break;
         case SCI_SETADDITIONALSELALPHA:
             {
-                m_scintilla1->SetAdditionalSelAlpha( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetAdditionalSelAlpha( l1 );
+
+                wxString cl = "m_stc->SetAdditionalSelAlpha(";
+                cl << (int) l1;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETADDITIONALSELALPHA:
             {
                 property->SetValueFromInt( m_scintilla1->GetAdditionalSelAlpha() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetAdditionalSelAlpha();\n");
+                rv=false;
             }
             break;
         case SCI_SETADDITIONALSELFORE:
             {
                 wxAny value = property->GetValue();
-                m_scintilla1->SetAdditionalSelForeground( value.As<wxColour>() );
+                wxColour col = value.As<wxColour>();
+                m_scintilla1->SetAdditionalSelForeground( col );
+
+
+                wxString cl = "m_stc->SetAdditionalSelForeground( wxColour(";
+                cl << (int) col.Red();
+                cl << ",";
+                cl << (int) col.Green();
+                cl << ",";
+                cl << (int) col.Blue();
+                cl << ") );\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_SETADDITIONALSELBACK:
             {
                 wxAny value = property->GetValue();
-                m_scintilla1->SetAdditionalSelBackground( value.As<wxColour>() );
+                wxColour col = value.As<wxColour>();
+                m_scintilla1->SetAdditionalSelBackground( col );
+
+                wxString cl = "m_stc->SetAdditionalSelBackground( wxColour(";
+                cl << (int) col.Red();
+                cl << ",";
+                cl << (int) col.Green();
+                cl << ",";
+                cl << (int) col.Blue();
+                cl << ") );\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_SETADDITIONALCARETFORE:
             {
                 wxAny value = property->GetValue();
-                m_scintilla1->SetAdditionalCaretForeground( value.As<wxColour>() );
+                wxColour col = value.As<wxColour>();
+                m_scintilla1->SetAdditionalCaretForeground( col );
+
+                wxString cl = "m_stc->SetAdditionalCaretForeground( wxColour(";
+                cl << (int) col.Red();
+                cl << ",";
+                cl << (int) col.Green();
+                cl << ",";
+                cl << (int) col.Blue();
+                cl << ") );\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETADDITIONALCARETFORE:
             {
                 setColorString( property, m_scintilla1->GetAdditionalCaretForeground() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetAdditionalCaretForeground();\n");
+                rv=false;
             }
             break;
         case SCI_SETADDITIONALCARETSBLINK:
             {
-                m_scintilla1->SetAdditionalCaretsBlink( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetAdditionalCaretsBlink( b );
+
+
+                wxString cl = "m_stc->SetAdditionalCaretsBlink(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETADDITIONALCARETSBLINK:
             {
                 property->SetValueFromString(m_scintilla1->GetAdditionalCaretsBlink()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetAdditionalCaretsBlink();\n");
+                rv=false;
             }
             break;
         case SCI_SETADDITIONALCARETSVISIBLE:
             {
-                m_scintilla1->SetAdditionalCaretsVisible( property->GetValue().GetBool() );
+                bool b= property->GetValue().GetBool();
+                m_scintilla1->SetAdditionalCaretsVisible( b );
+
+                wxString cl = "m_stc->SetAdditionalCaretsVisible(";
+                cl << (b?"true":"false");
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_GETADDITIONALCARETSVISIBLE:
             {
                 property->SetValueFromString(m_scintilla1->GetAdditionalCaretsVisible()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetAdditionalCaretsVisible();\n");
+                rv=false;
             }
             break;
         case SCI_SWAPMAINANCHORCARET:
             {
                 m_scintilla1->SwapMainAnchorCaret( );
+
+				m_CodeLog->AppendText("m_stc->SwapMainAnchorCaret();\n");
                 rv=false;
             }
             break;
         case SCI_ROTATESELECTION:
             {
                 m_scintilla1->RotateSelection( );
+
+				m_CodeLog->AppendText("m_stc->RotateSelection();\n");
                 rv=false;
             }
             break;
@@ -2188,12 +3327,21 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->LineScroll(l1,l2);
+
+                wxString cl = "m_stc->LineScroll(";
+                cl << (int) l1;
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_SCROLLCARET:
             {
                 m_scintilla1->EnsureCaretVisible();
+
+  				m_CodeLog->AppendText("m_stc->EnsureCaretVisible();\n");
                 rv=false;
             }
             break;
@@ -2207,6 +3355,37 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->SetXCaretPolicy(l1,l2);
                 statusBar->SetStatusText("X caret policy set.", 1);
+
+                wxString cl = "m_stc->SetXCaretPolicy(";
+  				bool found(false);
+				if((l1&wxSTC_CARET_SLOP)==wxSTC_CARET_SLOP)
+				{
+					cl<< "wxSTC_CARET_SLOP";
+					found=true;
+				}
+				if((l1&wxSTC_CARET_STRICT)==wxSTC_CARET_STRICT)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_CARET_STRICT";
+					found=true;
+				}
+                if((l1&wxSTC_CARET_JUMPS)==wxSTC_CARET_JUMPS)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_CARET_JUMPS";
+					found=true;
+				}
+				if((l1&wxSTC_CARET_EVEN)==wxSTC_CARET_EVEN)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_CARET_EVEN";
+					found=true;
+				}
+				cl << (found?"":"0");
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -2220,6 +3399,37 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->SetYCaretPolicy(l1,l2);
                 statusBar->SetStatusText("Y caret policy set.", 1);
+
+                wxString cl = "m_stc->SetYCaretPolicy(";
+  				bool found(false);
+				if((l1&wxSTC_CARET_SLOP)==wxSTC_CARET_SLOP)
+				{
+					cl<< "wxSTC_CARET_SLOP";
+					found=true;
+				}
+				if((l1&wxSTC_CARET_STRICT)==wxSTC_CARET_STRICT)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_CARET_STRICT";
+					found=true;
+				}
+                if((l1&wxSTC_CARET_JUMPS)==wxSTC_CARET_JUMPS)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_CARET_JUMPS";
+					found=true;
+				}
+				if((l1&wxSTC_CARET_EVEN)==wxSTC_CARET_EVEN)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_CARET_EVEN";
+					found=true;
+				}
+				cl << (found?"":"0");
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
@@ -2234,85 +3444,140 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 m_scintilla1->SetVisiblePolicy(l1,l2);
 
                 statusBar->SetStatusText("Visible policy set.", 1);
+                wxString cl = "m_stc->SetVisiblePolicy(";
+
+  				bool found(false);
+				if((l1&wxSTC_VISIBLE_SLOP)==wxSTC_VISIBLE_SLOP)
+				{
+					cl<< "wxSTC_VISIBLE_SLOP";
+					found=true;
+				}
+				if((l1&wxSTC_VISIBLE_STRICT)==wxSTC_VISIBLE_STRICT)
+				{
+					cl << (found?"|":"");
+					cl<< "wxSTC_VISIBLE_STRICT";
+					found=true;
+				}
+				cl << (found?"":"0");
+                cl << ",";
+                cl << (int) l2;
+                cl << ");\n";
+                m_CodeLog->AppendText(cl);
                 rv=false;
             }
             break;
         case SCI_SETHSCROLLBAR:
             {
-                m_scintilla1->SetUseHorizontalScrollBar( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetUseHorizontalScrollBar( b );
+
+                boolSetter(m_CodeLog,"m_stc->SetUseHorizontalScrollBar", b);
                 rv=false;
             }
             break;
         case SCI_GETHSCROLLBAR:
             {
                 property->SetValueFromString(m_scintilla1->GetUseHorizontalScrollBar()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetUseHorizontalScrollBar();\n");
+                rv=false;
             }
             break;
         case SCI_SETVSCROLLBAR:
             {
+                bool b = property->GetValue().GetBool();
                 m_scintilla1->SetUseVerticalScrollBar( property->GetValue().GetBool() );
+
+                boolSetter(m_CodeLog,"m_stc->SetUseVerticalScrollBar", b);
                 rv=false;
             }
             break;
         case SCI_GETVSCROLLBAR:
             {
                 property->SetValueFromString(m_scintilla1->GetUseVerticalScrollBar()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetUseVerticalScrollBar();\n");
+                rv=false;
             }
             break;
         case SCI_GETXOFFSET:
             {
                 property->SetValueFromInt( m_scintilla1->GetXOffset() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetXOffset();\n");
+                rv=false;
             }
             break;
         case SCI_SETXOFFSET:
             {
                 m_scintilla1->SetXOffset( property->GetValue().GetLong() );
+
+                intSetter(m_CodeLog,"m_stc->SetXOffset",property->GetValue().GetLong());
                 rv=false;
             }
             break;
         case SCI_SETSCROLLWIDTH:
             {
                 m_scintilla1->SetScrollWidth( property->GetValue().GetLong() );
+
+                intSetter(m_CodeLog,"m_stc->SetScrollWidth",property->GetValue().GetLong());
                 rv=false;
             }
             break;
         case SCI_GETSCROLLWIDTH:
             {
                 property->SetValueFromInt( m_scintilla1->GetScrollWidth() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetScrollWidth();\n");
+                rv=false;
             }
             break;
         case SCI_SETSCROLLWIDTHTRACKING:
             {
-                m_scintilla1->SetScrollWidthTracking( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetScrollWidthTracking( b );
+
+                boolSetter(m_CodeLog,"m_stc->SetScrollWidthTracking", b);
                 rv=false;
             }
             break;
         case SCI_GETSCROLLWIDTHTRACKING:
             {
                 property->SetValueFromString(m_scintilla1->GetScrollWidthTracking()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetScrollWidthTracking();\n");
+                rv=false;
             }
             break;
         case SCI_SETENDATLASTLINE:
             {
-                m_scintilla1->SetEndAtLastLine( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetEndAtLastLine( b );
+
+                boolSetter(m_CodeLog,"m_stc->SetEndAtLastLine", b);
                 rv=false;
             }
             break;
         case SCI_GETENDATLASTLINE:
             {
                 property->SetValueFromString(m_scintilla1->GetEndAtLastLine()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetEndAtLastLine();\n");
+                rv=false;
             }
             break;
 
         case SCI_SETVIEWWS:
             {
+                long l1 = property->GetValue().GetLong();
                 m_scintilla1->SetViewWhiteSpace( property->GetValue().GetLong() );
+
+                wxString cl = "m_stc->SetViewWhiteSpace(";
+                if(l1==wxSTC_WS_INVISIBLE) cl << "wxSTC_WS_INVISIBLE";
+                else if(l1==wxSTC_WS_VISIBLEALWAYS) cl << "wxSTC_WS_VISIBLEALWAYS";
+                else cl << "wxSTC_WS_VISIBLEAFTERINDENT";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetViewWhiteSpace(");
                 rv=false;
             }
             break;
@@ -2336,7 +3601,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString("(unknown whitespace mode");
                 }
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetViewWhiteSpace();\n");
+                rv=false;
             }
             break;
         case SCI_SETWHITESPACEFORE:
@@ -2349,11 +3616,10 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
                 it++;
                 wxAny value=it.GetProperty ()->GetValue();
-
                 bool b = property->GetValue();
-
                 m_scintilla1->SetWhitespaceForeground(b,value.As<wxColour>());
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetWhitespaceForeground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -2362,11 +3628,10 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
                 it--;
                 bool b=it.GetProperty ()->GetValue();
-
                 wxAny value = property->GetValue();
-
                 m_scintilla1->SetWhitespaceForeground(b,value.As<wxColour>());
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetWhitespaceForeground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -2380,11 +3645,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
                 it++;
                 wxAny value=it.GetProperty ()->GetValue();
-
                 bool b = property->GetValue();
 
                 m_scintilla1->SetWhitespaceBackground(b,value.As<wxColour>());
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetWhitespaceBackground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -2393,54 +3658,77 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
                 it--;
                 bool b=it.GetProperty ()->GetValue();
-
                 wxAny value = property->GetValue();
-
                 m_scintilla1->SetWhitespaceBackground(b,value.As<wxColour>());
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetWhitespaceBackground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
         case SCI_SETWHITESPACESIZE:
             {
+                long l1 = property->GetValue().GetLong();
                 m_scintilla1->SetWhitespaceSize( property->GetValue().GetLong() );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetWhitespaceSize",l1);
                 rv=false;
             }
             break;
         case SCI_GETWHITESPACESIZE:
             {
                 property->SetValueFromInt( m_scintilla1->GetWhitespaceSize() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetWhitespaceSize();\n");
+                rv=false;
             }
             break;
         case SCI_SETEXTRAASCENT:
             {
-                m_scintilla1->SetExtraAscent( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetExtraAscent( l1 );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetExtraAscent",l1);
                 rv=false;
             }
             break;
         case SCI_GETEXTRAASCENT:
             {
                 property->SetValueFromInt( m_scintilla1->GetExtraAscent() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetExtraAscent();\n");
+                rv=false;
             }
             break;
         case SCI_SETEXTRADESCENT:
             {
-                m_scintilla1->SetExtraDescent( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetExtraDescent( l1 );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetExtraDescent",l1);
                 rv=false;
             }
             break;
         case SCI_GETEXTRADESCENT:
             {
                 property->SetValueFromInt( m_scintilla1->GetExtraDescent() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetExtraDescent();\n");
+                rv=false;
             }
             break;
 
         case SCI_SETCURSOR:
             {
-                m_scintilla1->SetSTCCursor( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetSTCCursor( l1 );
+
+                wxString cl = "m_stc->SetSTCCursor(";
+                if(l1==wxSTC_CURSORNORMAL) cl << "wxSTC_CURSORNORMAL";
+                else if(l1==wxSTC_CURSORARROW) cl << "wxSTC_CURSORARROW";
+                else if(l1==wxSTC_CURSORWAIT) cl << "wxSTC_CURSORWAIT";
+                else cl << "wxSTC_CURSORREVERSEARROW";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetSTCCursor");
                 rv=false;
             }
             break;
@@ -2468,24 +3756,39 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString("(unknown cursor)");
                 }
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetSTCCursor();\n");
+                rv=false;
             }
             break;
         case SCI_SETMOUSEDOWNCAPTURES:
             {
-                m_scintilla1->SetMouseDownCaptures( property->GetValue().GetBool() );
+                bool b= property->GetValue().GetBool();
+                m_scintilla1->SetMouseDownCaptures( b );
+
+                boolSetter(m_CodeLog,"m_stc->SetMouseDownCaptures", b);
                 rv=false;
             }
             break;
         case SCI_GETMOUSEDOWNCAPTURES:
             {
                 property->SetValueFromString(m_scintilla1->GetMouseDownCaptures()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetMouseDownCaptures();\n");
+                rv=false;
             }
             break;
         case SCI_SETEOLMODE:
             {
-                m_scintilla1->SetEOLMode( property->GetValue().GetLong() );
+                long l1=property->GetValue().GetLong();
+                m_scintilla1->SetEOLMode( l1 );
+
+                wxString cl = "m_stc->SetEOLMode(";
+                if(l1==wxSTC_EOL_CRLF) cl << "wxSTC_EOL_CRLF";
+                else if(l1==wxSTC_EOL_CR) cl << "wxSTC_EOL_CR";
+                else cl << "wxSTC_EOL_LF";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetEOLMode");
                 rv=false;
             }
             break;
@@ -2509,6 +3812,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString("(unknown EOL mode)");
                 }
+
+				m_CodeLog->AppendText("m_stc->GetEOLMode();\n");
                 rv=false;
             }
             break;
@@ -2519,25 +3824,39 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 m_scintilla1->ConvertEOLs(l1);
+
+                wxString cl = "m_stc->ConvertEOLs(";
+                if(l1==wxSTC_EOL_CRLF) cl << "wxSTC_EOL_CRLF";
+                else if(l1==wxSTC_EOL_CR) cl << "wxSTC_EOL_CR";
+                else cl << "wxSTC_EOL_LF";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->ConvertEOLs");
                 rv=false;
             }
             break;
         case SCI_SETVIEWEOL:
             {
-                m_scintilla1->SetViewEOL( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetViewEOL( b );
+
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetViewEOL", b);
                 rv=false;
             }
             break;
         case SCI_GETVIEWEOL:
             {
                 property->SetValueFromString(m_scintilla1->GetViewEOL()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetViewEOL();\n");
+                rv=false;
             }
             break;
         case SCI_GETENDSTYLED:
             {
                 property->SetValueFromInt( m_scintilla1->GetEndStyled() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetEndStyled();\n");
+                rv=false;
             }
             break;
         case SCI_STARTSTYLING:
@@ -2554,6 +3873,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 statusBar->SetStatusText(wxString::Format("Styling begun at position %d",stylingPosition), 1);
 
+                twoIntSetter(m_CodeLog,"m_stc->StartStyling",l1,l2);
                 rv=false;
             }
             break;
@@ -2570,6 +3890,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 statusBar->SetStatusText(wxString::Format("Styling from %d to %d set to %d.",stylingPosition-l1,stylingPosition-1,l2), 1);
 
                 m_scintilla1->SetStyling(l1,l2);
+
+                twoIntSetter(m_CodeLog,"m_stc->SetStyling",l1,l2);
                 rv=false;
             }
             break;
@@ -2615,6 +3937,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 //                stylingPosition=stylingPosition+l1;
 //                statusBar->SetStatusText(wxString::Format("Styling bits from %d to %d have been set.",stylingPosition-l1,stylingPosition-1), 1);
 
+                m_CodeLog->AppendText("//Code generation for SetStyleBytes is not supported yet.\n");
                 rv=false;
             }
             break;
@@ -2627,6 +3950,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2=it.GetProperty ()->GetValue();
 
                 m_scintilla1->SetLineState(l1,l2);
+
+                twoIntSetter(m_CodeLog,"m_stc->SetLineState",l1,l2);
                 rv=false;
             }
             break;
@@ -2637,13 +3962,17 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1=it.GetProperty ()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetLineState(l1) );
-                rv=true;
+
+                intSetter(m_CodeLog,"m_stc->GetLineState",l1);
+                rv=false;
             }
             break;
         case SCI_GETMAXLINESTATE:
             {
                 property->SetValueFromInt( m_scintilla1->GetMaxLineState() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetMaxLineState();\n");
+                rv=false;
             }
             break;
 
@@ -2651,6 +3980,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 m_scintilla1->StyleResetDefault();
                 statusBar->SetStatusText("wxSTC_STYLE_DEFAULT has been reset to its initial state.", 1);
+
+                m_CodeLog->AppendText("m_stc->StyleResetDefault();\n");
                 rv=false;
             }
             break;
@@ -2658,14 +3989,18 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 m_scintilla1->StyleClearAll();
                 statusBar->SetStatusText("All style bytes have been set to 0.", 1);
+
+                m_CodeLog->AppendText("m_stc->StyleClearAll();\n");
                 rv=false;
             }
             break;
         case SCI_STYLESETFONT:
             {
+                wxString s = m_propgrid->GetPropertyValueAsString(property);
                 myStyleData* msd = dynamic_cast<myStyleData*>(property->GetParent()->GetClientObject());
-                m_scintilla1->StyleSetFaceName( msd->get_style() , m_propgrid->GetPropertyValueAsString(property) );
+                m_scintilla1->StyleSetFaceName( msd->get_style() , s );
 
+                styleStringSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetFaceName",s);
                 rv=false;
             }
             break;
@@ -2674,20 +4009,24 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromString( m_scintilla1->StyleGetFaceName(msd->get_style()) );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetFaceName();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETSIZE:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetSize( msd->get_style() , property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->StyleSetSize( msd->get_style() , l1 );
 
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
                 it++;
                 it++;
-                it.GetProperty ()->SetValueFromInt(property->GetValue().GetLong() * wxSTC_FONT_SIZE_MULTIPLIER );
+                it.GetProperty ()->SetValueFromInt(l1 * wxSTC_FONT_SIZE_MULTIPLIER );
 
+                styleIntSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetSize",l1);
                 rv=false;
             }
             break;
@@ -2696,20 +4035,24 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromInt( m_scintilla1->StyleGetSize(msd->get_style()) );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetSize();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETSIZEFRACTIONAL:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetSizeFractional( msd->get_style() , property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->StyleSetSizeFractional( msd->get_style() ,  l1);
 
 //                wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
 //                it--;
 //                it--;
 //                it.GetProperty ()->SetValueFromInt(property->GetValue().GetLong() / wxSTC_FONT_SIZE_MULTIPLIER );
 
+                styleIntSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetSizeFractional",l1);
                 rv=false;
             }
             break;
@@ -2719,15 +4062,18 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromInt( m_scintilla1->StyleGetSizeFractional(msd->get_style()) );
 
-                rv=true;
+				m_CodeLog->AppendText("m_stc->StyleGetSizeFractional();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETBOLD:
             {
+                bool b = property->GetValue().GetBool();
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetBold( msd->get_style() , property->GetValue().GetBool() );
+                m_scintilla1->StyleSetBold( msd->get_style() , b );
 
+                styleBoolSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetBold",b);
                 rv=false;
             }
             break;
@@ -2736,7 +4082,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromString(m_scintilla1->StyleGetBold( msd->get_style() )?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetBold();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETWEIGHT2:
@@ -2750,18 +4098,33 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 long l1 = property->GetValue().GetLong();
 
+                wxString cl = "m_stc->StyleSetWeight(";
+                wxString cl2;
+                cl << styleNoOrLable(m_propgrid, property);
+                cl << ",";
+                cl2  = cl;
+
                 if(l1==-1)
                 {
                     it.GetProperty()->Enable(true);
                     //m_scintilla1->StyleSetWeight( msd->get_style() , property->GetValue().GetLong() );
+                    cl << (int)(it.GetProperty()->GetValue().GetLong());
+
                 }
                 else
                 {
                     m_scintilla1->StyleSetWeight( msd->get_style() , property->GetValue().GetLong() );
                     it.GetProperty()->Enable(false);
                     it.GetProperty()->SetValueFromInt(property->GetValue().GetLong());
+
+
+                    if(l1==wxSTC_WEIGHT_NORMAL) cl << "wxSTC_WEIGHT_NORMAL";
+                    else if(l1==wxSTC_WEIGHT_SEMIBOLD) cl << "wxSTC_WEIGHT_SEMIBOLD";
+                    else cl << "wxSTC_WEIGHT_BOLD";
                 }
 
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
                 rv=false;
             }
             break;
@@ -2769,12 +4132,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 wxPGProperty* par = property->GetParent()->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetWeight( msd->get_style() , property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->StyleSetWeight( msd->get_style() ,  l1);
 
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_ALL,property);
                 it--;
                 it.GetProperty()->SetValueToUnspecified();
 
+                styleIntSetter(m_CodeLog,m_propgrid, property->GetParent(),"m_stc->StyleSetWeight",l1);
                 rv=false;
             }
             break;
@@ -2783,15 +4148,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromInt(m_scintilla1->StyleGetWeight( msd->get_style() ) );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetWeight();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETITALIC:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetItalic( msd->get_style() , property->GetValue().GetBool() );
+                bool b= property->GetValue().GetBool();
+                m_scintilla1->StyleSetItalic( msd->get_style() , b );
 
+                styleBoolSetter(m_CodeLog,m_propgrid, property->GetParent(),"m_stc->StyleSetItalic",b);
                 rv=false;
             }
             break;
@@ -2800,15 +4169,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromString(m_scintilla1->StyleGetItalic( msd->get_style() )?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetItalic();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETUNDERLINE:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetUnderline( msd->get_style() , property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->StyleSetUnderline( msd->get_style() , b );
 
+                styleBoolSetter(m_CodeLog,m_propgrid, property->GetParent(),"m_stc->StyleSetUnderline",b);
                 rv=false;
             }
             break;
@@ -2817,7 +4190,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromString(m_scintilla1->StyleGetUnderline( msd->get_style() )?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetUnderline();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETFORE:
@@ -2825,7 +4200,10 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 wxAny value = property->GetValue();
-                m_scintilla1->StyleSetForeground( msd->get_style(),value.As<wxColour>() );
+                wxColor col = value.As<wxColour>();
+                m_scintilla1->StyleSetForeground( msd->get_style(),col );
+
+                styleColorSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetForeground",col);
                 rv=false;
             }
             break;
@@ -2836,7 +4214,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
 
                 setColorString(property, m_scintilla1->StyleGetForeground( msd->get_style() ));
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetForeground();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETBACK:
@@ -2844,7 +4224,10 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 wxAny value = property->GetValue();
-                m_scintilla1->StyleSetBackground( msd->get_style(),value.As<wxColour>() );
+                wxColor col = value.As<wxColour>();
+                m_scintilla1->StyleSetBackground( msd->get_style(), col);
+
+                styleColorSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetBackground",col);
                 rv=false;
             }
             break;
@@ -2854,15 +4237,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 setColorString(property, m_scintilla1->StyleGetBackground( msd->get_style() ));
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetBackground();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETEOLFILLED:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetEOLFilled( msd->get_style() , property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->StyleSetEOLFilled( msd->get_style() , b );
 
+                styleBoolSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetEOLFilled",b);
                 rv=false;
             }
             break;
@@ -2870,8 +4257,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
+
                 property->SetValueFromString(m_scintilla1->StyleGetEOLFilled( msd->get_style() )?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetEOLFilled();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETCHARACTERSET:
@@ -2881,6 +4271,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 //m_scintilla1->StyleSetCharacterSet( msd->get_style() , m_propgrid->GetPropertyValueAsInt(property) );
                 m_scintilla1->SendMsg(2066,msd->get_style(),property->GetValue().GetLong() );
 
+                m_CodeLog->AppendText("//code generation for SCI_STYLESETCHARACTERSET is not yet implimented.\n");
                 rv=false;
             }
             break;
@@ -2980,15 +4371,27 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown character set)",i));
                 }
 
-                rv=true;
+				m_CodeLog->AppendText("m_stc->StyleGetCharacterSet();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETCASE:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetCase( msd->get_style() , property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->StyleSetCase( msd->get_style() , l1 );
 
+                wxString cl = "m_stc->StyleSetCase(";
+                wxString cl2;
+                cl << styleNoOrLable(m_propgrid, property);
+                cl << ",";
+                cl2  = cl;
+                if(l1==wxSTC_CASE_MIXED) cl << "wxSTC_CASE_MIXED";
+                else if(l1==wxSTC_CASE_UPPER) cl << "wxSTC_CASE_UPPER";
+                else cl << "wxSTC_CASE_LOWER";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
                 rv=false;
             }
             break;
@@ -3016,15 +4419,18 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown case)",i));
                 }
 
-                rv=true;
+				m_CodeLog->AppendText("m_stc->StyleGetCase();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETVISIBLE:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetVisible( msd->get_style() , property->GetValue().GetBool() );
+                bool b= property->GetValue().GetBool();
+                m_scintilla1->StyleSetVisible( msd->get_style() , b );
 
+                styleBoolSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetVisible",b);
                 rv=false;
             }
             break;
@@ -3033,15 +4439,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromString(m_scintilla1->StyleGetVisible( msd->get_style() )?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetVisible();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETCHANGEABLE:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetChangeable( msd->get_style() , property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool() ;
+                m_scintilla1->StyleSetChangeable( msd->get_style() , b );
 
+                styleBoolSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetChangeable",b);
                 rv=false;
             }
             break;
@@ -3050,15 +4460,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromString(m_scintilla1->StyleGetChangeable( msd->get_style() )?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetChangeable();\n");
+                rv=false;
             }
             break;
         case SCI_STYLESETHOTSPOT:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
-                m_scintilla1->StyleSetHotSpot( msd->get_style() , property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->StyleSetHotSpot( msd->get_style() , b );
 
+                styleBoolSetter(m_CodeLog,m_propgrid, property,"m_stc->StyleSetHotSpot",b);
                 rv=false;
             }
             break;
@@ -3067,7 +4481,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromString(m_scintilla1->StyleGetHotSpot( msd->get_style() )?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->StyleGetHotSpot();\n");
+                rv=false;
             }
             break;
 
@@ -3082,7 +4498,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 wxAny value = it.GetProperty()->GetValue();
 
-                if(property->GetValue().GetBool())
+                bool b = property->GetValue().GetBool();
+                if(b)
                 {
                     m_scintilla1->SetSelForeground( true,value.As<wxColour>() );
                 }
@@ -3091,6 +4508,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetSelForeground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetSelForeground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3100,7 +4518,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it--;
                 wxAny value = property->GetValue();
 
-                if(it.GetProperty()->GetValue().GetBool())
+                bool b = it.GetProperty()->GetValue().GetBool();
+                if(b)
                 {
                     m_scintilla1->SetSelForeground( true,value.As<wxColour>() );
                 }
@@ -3109,6 +4528,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetSelForeground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetSelForeground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3124,7 +4544,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it++;
                 wxAny value = it.GetProperty()->GetValue();
 
-                if(property->GetValue().GetBool())
+                bool b = property->GetValue().GetBool();
+                if(b)
                 {
                     m_scintilla1->SetSelBackground( true,value.As<wxColour>() );
                 }
@@ -3133,6 +4554,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetSelBackground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetSelBackground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3142,7 +4564,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 it--;
                 wxAny value = property->GetValue();
 
-                if(it.GetProperty()->GetValue().GetBool())
+                bool b = it.GetProperty()->GetValue().GetBool();
+                if(b)
                 {
                     m_scintilla1->SetSelBackground( true,value.As<wxColour>() );
                 }
@@ -3151,38 +4574,51 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetSelBackground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetSelBackground", b,  value.As<wxColour>());
                 rv=false;
             }
             break;
 
         case SCI_SETSELALPHA:
             {
-                m_scintilla1->SetSelAlpha( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetSelAlpha( l1 );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetSelAlpha",l1);
                 rv=false;
             }
             break;
         case SCI_GETSELALPHA:
             {
                 property->SetValueFromInt(m_scintilla1->GetSelAlpha());
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetSelAlpha();\n");
+                rv=false;
             }
             break;
         case SCI_SETSELEOLFILLED:
             {
-                m_scintilla1->SetSelEOLFilled( property->GetValue().GetBool() );
+                bool b = property->GetValue().GetBool();
+                m_scintilla1->SetSelEOLFilled( b );
+
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetSelEOLFilled", b);
                 rv=false;
             }
             break;
         case SCI_GETSELEOLFILLED:
             {
                 property->SetValueFromString(m_scintilla1->GetSelEOLFilled()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetSelEOLFilled();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETFORE:
             {
                 wxAny value = property->GetValue();
                 m_scintilla1->SetCaretForeground( value.As<wxColour>() );
+
+                appendOrOverwriteColor(m_CodeLog,"m_stc->SetCaretForeground",  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3190,25 +4626,33 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 //property->SetValueFromString( m_scintilla1->GetCaretForeground().GetAsString() );
                 setColorString( property, m_scintilla1->GetCaretForeground() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetCaretForeground();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETLINEVISIBLE:
             {
                 m_scintilla1->SetCaretLineVisible( property->GetValue().GetBool() );
+
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetCaretLineVisible", property->GetValue().GetBool());
                 rv=false;
             }
             break;
         case SCI_GETCARETLINEVISIBLE:
             {
                 property->SetValueFromString(m_scintilla1->GetCaretLineVisible()?"True":"False");
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetCaretLineVisible();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETLINEBACK:
             {
                 wxAny value = property->GetValue();
                 m_scintilla1->SetCaretLineBackground( value.As<wxColour>() );
+
+                appendOrOverwriteColor(m_CodeLog,"m_stc->SetCaretLineBackground",  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3216,36 +4660,54 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 //property->SetValueFromString( m_scintilla1->GetCaretLineBackground().GetAsString() );
                 setColorString( property, m_scintilla1->GetCaretLineBackground() );
-                rv=true;
+
+				m_CodeLog->AppendText("m_stc->GetCaretLineBackground();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETLINEBACKALPHA:
             {
                 m_scintilla1->SetCaretLineBackAlpha( property->GetValue().GetLong() );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetCaretLineBackAlpha",  property->GetValue().GetLong() );
                 rv=false;
             }
             break;
         case SCI_GETCARETLINEBACKALPHA:
             {
                 property->SetValueFromInt( m_scintilla1->GetCaretLineBackAlpha() );
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetCaretLineBackAlpha();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETPERIOD:
             {
                 m_scintilla1->SetCaretPeriod( property->GetValue().GetLong() );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetCaretPeriod",  property->GetValue().GetLong() );
                 rv=false;
             }
             break;
         case SCI_GETCARETPERIOD:
             {
                 property->SetValueFromInt( m_scintilla1->GetCaretPeriod() );
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetCaretPeriod();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETSTYLE:
             {
-                m_scintilla1->SetCaretStyle( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetCaretStyle( l1 );
+
+                wxString cl = "m_stc->SetCaretStyle(";
+                if(l1==wxSTC_CARETSTYLE_INVISIBLE) cl << "wxSTC_CARETSTYLE_INVISIBLE";
+                else if(l1==wxSTC_CARETSTYLE_LINE) cl << "wxSTC_CARETSTYLE_LINE";
+                else cl << "wxSTC_CARETSTYLE_BLOCK";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetCaretStyle(");
                 rv=false;
             }
             break;
@@ -3270,19 +4732,24 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown caret style)",i));
                 }
 
-                rv=true;
+  				m_CodeLog->AppendText("m_stc->GetCaretStyle();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETWIDTH:
             {
                 m_scintilla1->SetCaretWidth( property->GetValue().GetLong() );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetCaretWidth",property->GetValue().GetLong());
                 rv=false;
             }
             break;
         case SCI_GETCARETWIDTH:
             {
                 property->SetValueFromInt( m_scintilla1->GetCaretWidth() );
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetCaretWidth();\n");
+                rv=false;
             }
             break;
         case SCI_SETHOTSPOTACTIVEFORE:
@@ -3306,6 +4773,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetHotspotActiveForeground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetHotspotActiveForeground", property->GetValue().GetBool(),  value.As<wxColour>());
+
                 rv=false;
             }
             break;
@@ -3325,6 +4794,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetHotspotActiveForeground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetHotspotActiveForeground", it.GetProperty()->GetValue().GetBool(),  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3333,7 +4803,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 //property->SetValueFromString( m_scintilla1->GetHotspotActiveForeground().GetAsString() );
                 setColorString( property, m_scintilla1->GetHotspotActiveForeground() );
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetHotspotActiveForeground();\n");
+                rv=false;
             }
             break;
 
@@ -3357,6 +4829,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetHotspotActiveBackground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetHotspotActiveBackground", property->GetValue().GetBool(),  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3376,6 +4849,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetHotspotActiveBackground( false,value.As<wxColour>() );
                 }
 
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetHotspotActiveBackground", it.GetProperty()->GetValue().GetBool(),  value.As<wxColour>());
                 rv=false;
             }
             break;
@@ -3384,48 +4858,70 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 //property->SetValueFromString( m_scintilla1->GetHotspotActiveBackground().GetAsString() );
                 setColorString( property, m_scintilla1->GetHotspotActiveBackground() );
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetHotspotActiveBackground();\n");
+                rv=false;
             }
             break;
         case SCI_SETHOTSPOTACTIVEUNDERLINE:
             {
                 m_scintilla1->SetHotspotActiveUnderline( property->GetValue().GetBool() );
+
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetHotspotActiveUnderline", property->GetValue().GetBool());
                 rv=false;
             }
             break;
         case SCI_GETHOTSPOTACTIVEUNDERLINE:
             {
                 property->SetValueFromString(m_scintilla1->GetHotspotActiveUnderline()?"True":"False");
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetHotspotActiveUnderline();\n");
+                rv=false;
             }
             break;
         case SCI_SETHOTSPOTSINGLELINE:
             {
                 m_scintilla1->SetHotspotSingleLine( property->GetValue().GetBool() );
-                rv=true;
+
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetHotspotSingleLine", property->GetValue().GetBool());
+                rv=false;
             }
             break;
         case SCI_GETHOTSPOTSINGLELINE:
             {
                 property->SetValueFromString(m_scintilla1->GetHotspotSingleLine()?"True":"False");
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetHotspotSingleLine();\n");
+                rv=false;
             }
             break;
         case SCI_SETCONTROLCHARSYMBOL:
             {
                 m_scintilla1->SetControlCharSymbol( property->GetValue().GetLong() );
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetControlCharSymbol",property->GetValue().GetLong());
                 rv=false;
             }
             break;
         case SCI_GETCONTROLCHARSYMBOL:
             {
                 property->SetValueFromInt(m_scintilla1->GetControlCharSymbol());
-                rv=true;
+
+  				m_CodeLog->AppendText("m_stc->GetControlCharSymbol();\n");
+                rv=false;
             }
             break;
         case SCI_SETCARETSTICKY:
             {
-                m_scintilla1->SetCaretSticky( property->GetValue().GetLong() );
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetCaretSticky( l1 );
+
+                wxString cl = "m_stc->SetCaretSticky(";
+                if(l1==wxSTC_CARETSTICKY_OFF) cl << "wxSTC_CARETSTICKY_OFF";
+                else if(l1==wxSTC_CARETSTICKY_ON) cl << "wxSTC_CARETSTICKY_ON";
+                else cl << "wxSTC_CARETSTICKY_WHITESPACE";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,"m_stc->SetCaretSticky(");
                 rv=false;
             }
             break;
@@ -3450,7 +4946,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown caret sticky value)",i));
                 }
 
-                rv=true;
+  				m_CodeLog->AppendText("m_stc->GetCaretSticky();\n");
+                rv=false;
             }
             break;
         case SCI_TOGGLECARETSTICKY:
@@ -3464,6 +4961,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 it.GetProperty()->SetValueToUnspecified();
 
+  				m_CodeLog->AppendText("m_stc->ToggleCaretSticky();\n");
                 rv=false;
             }
             break;
@@ -3473,8 +4971,22 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
-                m_scintilla1->SetMarginType( msd->get_style(),property->GetValue().GetLong() );
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetMarginType( msd->get_style(), l1 );
+
+                wxString cl = "m_stc->SetMarginType(";
+                wxString cl2;
+                cl << msd->get_style();
+                cl << ",";
+                cl2  = cl;
+                if(l1==wxSTC_MARGIN_SYMBOL)      cl << "wxSTC_MARGIN_SYMBOL";
+                else if(l1==wxSTC_MARGIN_NUMBER) cl << "wxSTC_MARGIN_NUMBER";
+                else if(l1==wxSTC_MARGIN_BACK)   cl << "wxSTC_MARGIN_BACK";
+                else if(l1==wxSTC_MARGIN_FORE)   cl << "wxSTC_MARGIN_FORE";
+                else if(l1==wxSTC_MARGIN_TEXT)   cl << "wxSTC_MARGIN_TEXT";
+                else cl << "wxSTC_MARGIN_RTEXT";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETMARGINTYPEN:
@@ -3513,7 +5025,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown margin type)",i));
                 }
 
-                rv= true;
+                styleGetter(m_CodeLog,m_propgrid, property,"GetMarginType");
             }
             break;
         case SCI_SETMARGINWIDTHN:
@@ -3521,7 +5033,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 m_scintilla1->SetMarginWidth( msd->get_style(),property->GetValue().GetLong() );
-                rv=false;
+
+                styleIntSetter(m_CodeLog,m_propgrid, property,"m_stc->SetMarginWidth", property->GetValue().GetLong());
             }
             break;
         case SCI_GETMARGINWIDTHN:
@@ -3529,7 +5042,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 property->SetValueFromInt( m_scintilla1->GetMarginWidth( msd->get_style() ));
-                rv= true;
+
+                styleGetter(m_CodeLog,m_propgrid, property,"GetMarginWidth");
             }
             break;
         case SCI_SETMARGINMASKN:
@@ -3540,20 +5054,35 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
                 it++;
 
+                wxString cl = "m_stc->SetMarginMask(";
+                wxString cl2;
+                cl << msd->get_style();
+                cl << ",";
+                cl2  = cl;
+
                 long l = property->GetValue().GetLong();
                 if(l==-1)
                 {
                     it.GetProperty()->Enable(true);
                     m_scintilla1->SetMarginMask( msd->get_style() , it.GetProperty()->GetValue().GetLong() );
+
+                    cl << (int) it.GetProperty()->GetValue().GetLong();
                 }
                 else
                 {
                     it.GetProperty()->Enable(false);
                     it.GetProperty()->SetValueFromInt(l);
-                    m_scintilla1->SetMarginMask( msd->get_style() , property->GetValue().GetLong() );
+
+                    long l1 = property->GetValue().GetLong();
+                    m_scintilla1->SetMarginMask( msd->get_style() , l1 );
+
+                    if(l1==0)      cl << "0";
+                    else if(l1==wxSTC_MASK_FOLDERS) cl << "wxSTC_MASK_FOLDERS";
+                    else cl << "~wxSTC_MASK_FOLDERS";;
                 }
 
-                rv=false;
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_SETMARGINMASKN2:
@@ -3562,7 +5091,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 m_scintilla1->SetMarginMask( msd->get_style() , property->GetValue().GetLong() );
-                rv=false;
+
+                styleIntSetter(m_CodeLog,m_propgrid, property->GetParent(),"m_stc->SetMarginMask", property->GetValue().GetLong());
             }
             break;
 
@@ -3587,7 +5117,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv= true;
+
+                styleGetter(m_CodeLog,m_propgrid, property,"GetMarginMask");
             }
             break;
         case SCI_SETMARGINSENSITIVEN:
@@ -3595,7 +5126,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
                 m_scintilla1->SetMarginSensitive( msd->get_style() , property->GetValue().GetBool());
-                rv=false;
+
+                styleBoolSetter(m_CodeLog,m_propgrid, property,"m_stc->SetMarginSensitive", property->GetValue().GetBool());
             }
             break;
         case SCI_GETMARGINSENSITIVEN:
@@ -3604,15 +5136,29 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 property->SetValueFromString(m_scintilla1->GetMarginSensitive(msd->get_style())?"True":"False");
-                rv=true;
+
+                styleGetter(m_CodeLog,m_propgrid, property,"GetMarginSensitive");
             }
             break;
         case SCI_SETMARGINCURSORN:
             {
                 wxPGProperty* par = property->GetParent();
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
+                long l1 = property->GetValue().GetLong();
 
-                m_scintilla1->SetMarginCursor( msd->get_style() , property->GetValue().GetLong() );
+                m_scintilla1->SetMarginCursor( msd->get_style() , l1 );
+
+                wxString cl2;
+                wxString cl = "m_stc->SetMarginCursor(";
+                cl << msd->get_style();
+                cl << ",";
+                cl2=cl;
+                if(l1==wxSTC_CURSORNORMAL) cl << "wxSTC_CURSORNORMAL";
+                else if(l1==wxSTC_CURSORARROW) cl << "wxSTC_CURSORARROW";
+                else if(l1==wxSTC_CURSORWAIT) cl << "wxSTC_CURSORWAIT";
+                else cl << "wxSTC_CURSORREVERSEARROW";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
                 rv=false;
             }
             break;
@@ -3643,31 +5189,34 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown cursor number)",i));
                 }
-                rv=true;
+
+                styleGetter(m_CodeLog,m_propgrid, property,"GetMarginCursor");
             }
             break;
         case SCI_SETMARGINLEFT:
             {
                 m_scintilla1->SetMarginLeft( property->GetValue().GetLong() );
-                rv=false;
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetMarginLeft",property->GetValue().GetLong());
             }
             break;
         case SCI_GETMARGINLEFT:
             {
                 property->SetValueFromInt(m_scintilla1->GetMarginLeft());
-                rv=true;
+                basicGetter(m_CodeLog,"GetMarginLeft");
             }
             break;
         case SCI_SETMARGINRIGHT:
             {
                 m_scintilla1->SetMarginRight( property->GetValue().GetLong() );
-                rv=false;
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetMarginRight",property->GetValue().GetLong());
             }
             break;
         case SCI_GETMARGINRIGHT:
             {
                 property->SetValueFromInt(m_scintilla1->GetMarginRight());
-                rv=true;
+                basicGetter(m_CodeLog,"GetMarginRight");
             }
             break;
         case SCI_SETFOLDMARGINCOLOUR:
@@ -3691,7 +5240,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetFoldMarginColour( false,value.As<wxColour>() );
                 }
 
-                rv=false;
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetFoldMarginColour", property->GetValue().GetBool(),  value.As<wxColour>());
             }
             break;
 
@@ -3710,7 +5259,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetFoldMarginColour( false,value.As<wxColour>() );
                 }
 
-                rv=false;
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetFoldMarginColour", it.GetProperty()->GetValue().GetBool(),  value.As<wxColour>());
             }
             break;
 
@@ -3735,7 +5284,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetFoldMarginHiColour( false,value.As<wxColour>() );
                 }
 
-                rv=false;
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetFoldMarginHiColour", property->GetValue().GetBool(),  value.As<wxColour>());
             }
             break;
 
@@ -3754,7 +5303,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->SetFoldMarginHiColour( false,value.As<wxColour>() );
                 }
 
-                rv=false;
+                appendOrOverwriteBoolColor(m_CodeLog,"m_stc->SetFoldMarginHiColour", it.GetProperty()->GetValue().GetBool(),  value.As<wxColour>());
             }
             break;
 
@@ -3768,7 +5317,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->MarginSetText( l1,s );
 
-                rv=false;
+                intStringSetter(m_CodeLog,"m_stc->MarginSetText",l1,s);
             }
             break;
         case SCI_MARGINGETTEXT:
@@ -3778,7 +5327,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromString(m_scintilla1->MarginGetText(l1));
-                rv=true;
+
+                intSetter(m_CodeLog,"m_stc->MarginGetText",l1);
             }
             break;
         case SCI_MARGINSETSTYLE:
@@ -3791,7 +5341,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->MarginSetStyle( l1,l2 );
 
-                rv=false;
+                twoIntSetter(m_CodeLog,"m_stc->MarginSetStyle",l1,l2);
             }
             break;
         case SCI_MARGINGETSTYLE:
@@ -3801,7 +5351,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->MarginGetStyle(l1));
-                rv=true;
+
+                intSetter(m_CodeLog,"m_stc->MarginGetStyle",l1);
             }
             break;
         case SCI_MARGINSETSTYLES:
@@ -3832,7 +5383,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     }
 //                }
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for MarginSetStyles is not implimented yet!\n");
             }
             break;
         case SCI_MARGINGETSTYLES:
@@ -3863,31 +5414,39 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 //                md.setStyledText( buf );
 //                md.ShowModal();
 
-                rv=false;
+                intSetter(m_CodeLog,"m_stc->MarginGetStyles",l1);
             }
             break;
         case SCI_MARGINTEXTCLEARALL:
             {
                 m_scintilla1->MarginTextClearAll();
-                rv=false;
+                basicGetter(m_CodeLog,"MarginTextClearAll");
             }
             break;
         case SCI_MARGINSETSTYLEOFFSET:
             {
                 m_scintilla1->MarginSetStyleOffset(property->GetValue().GetLong());
-                rv=false;
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->MarginSetStyleOffset",property->GetValue().GetLong());
             }
             break;
         case SCI_MARGINGETSTYLEOFFSET:
             {
                 property->SetValueFromInt(m_scintilla1->MarginGetStyleOffset());
-                rv=true;
+                basicGetter(m_CodeLog,"MarginGetStyleOffset");
             }
             break;
         case SCI_SETMARGINOPTIONS:
             {
-                m_scintilla1->SetMarginOptions(property->GetValue().GetLong());
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetMarginOptions(l1);
+
+                wxString cl2 = "m_stc->SetMarginOptions(";
+                wxString cl = cl2;
+                if(l1==wxSTC_MARGINOPTION_NONE) cl << "wxSTC_MARGINOPTION_NONE";
+                else cl << "wxSTC_MARGINOPTION_SUBLINESELECT";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETMARGINOPTIONS:
@@ -3906,7 +5465,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - margin options number)",i));
                 }
-                rv=true;
+
+                basicGetter(m_CodeLog,"GetMarginOptions");
             }
             break;
 
@@ -3921,7 +5481,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->AnnotationSetText( l1,s );
 
-                rv=false;
+                intStringSetter(m_CodeLog,"m_stc->AnnotationSetText",l1,s);
             }
             break;
         case SCI_ANNOTATIONGETTEXT:
@@ -3931,7 +5491,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromString(m_scintilla1->AnnotationGetText(l1));
-                rv=true;
+                intSetter(m_CodeLog,"m_stc->SetValueFromString",l1);
             }
             break;
         case SCI_ANNOTATIONSETSTYLE:
@@ -3944,7 +5504,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->AnnotationSetStyle( l1,l2 );
 
-                rv=false;
+                twoIntSetter(m_CodeLog,"m_stc->AnnotationSetStyle",l1,l2);
             }
             break;
         case SCI_ANNOTATIONGETSTYLE:
@@ -3954,7 +5514,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->AnnotationGetStyle(l1));
-                rv=true;
+                intSetter(m_CodeLog,"m_stc->AnnotationGetStyle",l1);
             }
             break;
         case SCI_ANNOTATIONSETSTYLES:
@@ -3984,7 +5544,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 }
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for AnnotationSetStyles is not immplimented yet!\n");
             }
             break;
         case SCI_ANNOTATIONGETSTYLES:
@@ -4003,7 +5563,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 md.ShowModal();
 
-                rv=false;
+                intSetter(m_CodeLog,"m_stc->AnnotationGetStyles",l1);
             }
             break;
         case SCI_ANNOTATIONGETLINES:
@@ -4013,7 +5573,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->AnnotationGetLines(l1));
-                rv=true;
+
+                intSetter(m_CodeLog,"m_stc->AnnotationGetLines",l1);
             }
             break;
         case SCI_ANNOTATIONCLEARALL:
@@ -4024,15 +5585,21 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
 
                 m_scintilla1->AnnotationClearAll();
-
-
-                rv=false;
+                basicGetter(m_CodeLog,"AnnotationClearAll");
             }
             break;
         case SCI_ANNOTATIONSETVISIBLE:
             {
-                m_scintilla1->AnnotationSetVisible(property->GetValue().GetLong());
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->AnnotationSetVisible(l1);
+
+                wxString cl2 = "m_stc->AnnotationSetVisible(";
+                wxString cl = cl2;
+                if(l1==wxSTC_ANNOTATION_HIDDEN) cl << "wxSTC_ANNOTATION_HIDDEN";
+                else if(l1==wxSTC_ANNOTATION_STANDARD) cl << "wxSTC_ANNOTATION_STANDARD";
+                else cl << "wxSTC_ANNOTATION_BOXED";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_ANNOTATIONGETVISIBLE:
@@ -4055,19 +5622,21 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown attotation visibility option)",i));
                 }
-                rv=true;
+
+                basicGetter(m_CodeLog,"AnnotationGetVisible");
             }
             break;
         case SCI_ANNOTATIONSETSTYLEOFFSET:
             {
                 m_scintilla1->AnnotationSetStyleOffset(property->GetValue().GetLong());
-                rv=false;
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->AnnotationSetStyleOffset",property->GetValue().GetLong());
             }
             break;
         case SCI_ANNOTATIONGETSTYLEOFFSET:
             {
                 property->SetValueFromInt(m_scintilla1->AnnotationGetStyleOffset());
-                rv=true;
+                basicGetter(m_CodeLog,"AnnotationGetStyleOffset");
             }
             break;
 
@@ -4084,31 +5653,38 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
         case SCI_SETBUFFEREDDRAW:
             {
                 m_scintilla1->SetBufferedDraw(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetBufferedDraw", property->GetValue().GetBool());
             }
             break;
         case SCI_GETBUFFEREDDRAW:
             {
                 property->SetValueFromString(m_scintilla1->GetBufferedDraw()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetBufferedDraw");
             }
             break;
         case SCI_SETTWOPHASEDRAW:
             {
                 m_scintilla1->SetTwoPhaseDraw(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetTwoPhaseDraw", property->GetValue().GetBool());
             }
             break;
         case SCI_GETTWOPHASEDRAW:
             {
                 property->SetValueFromString(m_scintilla1->GetTwoPhaseDraw()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetTwoPhaseDraw");
             }
             break;
         case SCI_SETTECHNOLOGY:
             {
-                m_scintilla1->SetTechnology(property->GetValue().GetLong());
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetTechnology(l1);
+
+                wxString cl2 = "m_stc->SetTechnology(";
+                wxString cl = cl2;
+                if(l1==wxSTC_TECHNOLOGY_DEFAULT) cl << "wxSTC_TECHNOLOGY_DEFAULT";
+                else cl << "wxSTC_TECHNOLOGY_DIRECTWRITE";
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETTECHNOLOGY:
@@ -4127,13 +5703,21 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown technology)",i));
                 }
-                rv=true;
+                basicGetter(m_CodeLog,"GetTechnology");
             }
             break;
         case SCI_SETFONTQUALITY:
             {
-                m_scintilla1->SendMsg(2611,property->GetValue().GetLong(),0);
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SendMsg(2611,l1,0);
+                wxString cl2 = "m_stc->SendMsg(2611,";
+                wxString cl = cl2;
+                if(l1==wxSTC_EFF_QUALITY_DEFAULT) cl << "wxSTC_EFF_QUALITY_DEFAULT";
+                else if(l1==wxSTC_EFF_QUALITY_NON_ANTIALIASED) cl << "wxSTC_EFF_QUALITY_NON_ANTIALIASED";
+                else if(l1==wxSTC_EFF_QUALITY_ANTIALIASED) cl << "wxSTC_EFF_QUALITY_ANTIALIASED";
+                else cl << "wxSTC_EFF_QUALITY_LCD_OPTIMIZED";
+                cl << ",0);\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETFONTQUALITY:
@@ -4160,13 +5744,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown font quality)",i));
                 }
-                rv=true;
+                m_CodeLog->AppendText("m_stc->SendMsg(2612,0,0);\n");
             }
             break;
         case SCI_SETCODEPAGE:
             {
                 m_scintilla1->SetCodePage(property->GetValue().GetLong());
-                rv=false;
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetCodePage",property->GetValue().GetLong());
             }
             break;
         case SCI_GETCODEPAGE:
@@ -4205,19 +5790,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown code page)",i));
                 }
-                rv=true;
+                basicGetter(m_CodeLog,"GetCodePage");
             }
             break;
         case SCI_SETKEYSUNICODE:
             {
                 m_scintilla1->SetKeysUnicode(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetKeysUnicode", property->GetValue().GetBool());
             }
             break;
         case SCI_GETKEYSUNICODE:
             {
                 property->SetValueFromString(m_scintilla1->GetKeysUnicode()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetKeysUnicode");
             }
             break;
         case SCI_SETWORDCHARS:
@@ -4227,13 +5812,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty()->GetValue();
 
                 m_scintilla1->SetWordChars(s);
-                rv=false;
+                appendOrOverwriteString(m_CodeLog,"m_stc->SetWordChars",s);
             }
             break;
         case SCI_GETWORDCHARS:
             {
                 property->SetValueFromString( m_scintilla1->GetWordChars() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetWordChars");
             }
             break;
         case SCI_SETWHITESPACECHARS:
@@ -4243,13 +5828,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty()->GetValue();
 
                 m_scintilla1->SetWhitespaceChars(s);
-                rv=false;
+                appendOrOverwriteString(m_CodeLog,"m_stc->SetWhitespaceChars",s);
             }
             break;
         case SCI_GETWHITESPACECHARS:
             {
                 property->SetValueFromString( m_scintilla1->GetWhitespaceChars() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetWhitespaceChars");
             }
             break;
         case SCI_SETPUNCTUATIONCHARS:
@@ -4259,37 +5844,37 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty()->GetValue();
 
                 m_scintilla1->SetPunctuationChars(s);
-                rv=false;
+                appendOrOverwriteString(m_CodeLog,"m_stc->SetPunctuationChars",s);
             }
             break;
         case SCI_GETPUNCTUATIONCHARS:
             {
                 property->SetValueFromString( m_scintilla1->GetPunctuationChars() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetPunctuationChars");
             }
             break;
         case SCI_SETCHARSDEFAULT:
             {
                 m_scintilla1->SetCharsDefault();
-                rv=false;
+                basicGetter(m_CodeLog,"SetCharsDefault");
             }
             break;
         case SCI_GRABFOCUS:
             {
                 m_scintilla1->SendMsg(2400,0,0);
-                rv=false;
+                appendOrOverwrite(m_CodeLog,"m_stc->SendMsg(2400,0,0);\n","m_stc->SendMsg(2400,0,0)");
             }
             break;
         case SCI_SETFOCUS:
             {
                 m_scintilla1->SetSTCFocus(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwriteBool(m_CodeLog,"m_stc->SetSTCFocus", property->GetValue().GetBool());
             }
             break;
         case SCI_GETFOCUS:
             {
                 property->SetValueFromString(m_scintilla1->GetSTCFocus()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetSTCFocus");
             }
             break;
 
@@ -4302,7 +5887,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->BraceHighlight(l1,l2);
-                rv=false;
+
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->BraceHighlight",l1,l2);
             }
             break;
         case SCI_BRACEBADLIGHT:
@@ -4312,7 +5898,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 m_scintilla1->BraceBadLight(l1);
-                rv=false;
+
+                appendOrOverwriteInt(m_CodeLog,"m_stc->BraceBadLight",l1);
             }
             break;
         case SCI_BRACEHIGHLIGHTINDICATOR:
@@ -4329,7 +5916,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->BraceHighlightIndicator(b,l1);
                 //statusBar->SetStatusText(wxString::Format("parm1:Indicator %d set=%s",l1,(b?"true":"false")), 1);
-                rv=false;
+                appendOrOverwriteBoolInt(m_CodeLog,"m_stc->BraceHighlightIndicator", b,  l1);
             }
             break;
         case SCI_BRACEHIGHLIGHTINDICATORPARM2:
@@ -4342,7 +5929,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 m_scintilla1->BraceHighlightIndicator(b,l1);
 
                 //statusBar->SetStatusText(wxString::Format("parm2:Indicator %d set=%s",l1,(b?"true":"false")), 1);
-                rv=false;
+                appendOrOverwriteBoolInt(m_CodeLog,"m_stc->BraceHighlightIndicator", b,  l1);
             }
         case SCI_BRACEBADLIGHTINDICATOR:
             {
@@ -4357,7 +5944,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 m_scintilla1->BraceBadLightIndicator(b,l1);
-                rv=false;
+                appendOrOverwriteBoolInt(m_CodeLog,"m_stc->BraceBadLightIndicator", b,  l1);
             }
             break;
         case SCI_BRACEBADLIGHTINDICATORPARM2:
@@ -4368,8 +5955,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 bool b = it.GetProperty()->GetValue().GetBool();
 
                 m_scintilla1->BraceBadLightIndicator(b,l1);
-                rv=false;
+                appendOrOverwriteBoolInt(m_CodeLog,"m_stc->BraceBadLightIndicator", b,  l1);
             }
+            break;
         case SCI_BRACEMATCH:
             {
                 wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
@@ -4377,68 +5965,68 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->BraceMatch(l1) );
-                rv=true;
+                intSetter(m_CodeLog,"m_stc->BraceMatch",l1);
             }
             break;
 
         case SCI_SETTABWIDTH:
             {
                 m_scintilla1->SetTabWidth( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetTabWidth");
             }
             break;
         case SCI_GETTABWIDTH:
             {
                 property->SetValueFromInt( m_scintilla1->GetTabWidth() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetTabWidth");
             }
             break;
         case SCI_SETUSETABS:
             {
                 m_scintilla1->SetUseTabs( property->GetValue().GetBool() );
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"SetUseTabs");
             }
             break;
         case SCI_GETUSETABS:
             {
                 property->SetValueFromString(m_scintilla1->GetUseTabs()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetUseTabs");
             }
             break;
         case SCI_SETINDENT:
             {
                 m_scintilla1->SetIndent( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetIndent");
             }
             break;
         case SCI_GETINDENT:
             {
                 property->SetValueFromInt(m_scintilla1->GetIndent());
-                rv=true;
+                basicGetter(m_CodeLog,"GetIndent");
             }
             break;
         case SCI_SETTABINDENTS:
             {
                 m_scintilla1->SetTabIndents( property->GetValue().GetBool() );
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"SetTabIndents");
             }
             break;
         case SCI_GETTABINDENTS:
             {
                 property->SetValueFromString(m_scintilla1->GetTabIndents()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetTabIndents");
             }
             break;
         case SCI_SETBACKSPACEUNINDENTS:
             {
                 m_scintilla1->SetBackSpaceUnIndents( property->GetValue().GetBool() );
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"SetBackSpaceUnIndents");
             }
             break;
         case SCI_GETBACKSPACEUNINDENTS:
             {
                 property->SetValueFromString(m_scintilla1->GetBackSpaceUnIndents()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetBackSpaceUnIndents");
             }
             break;
         case SCI_SETLINEINDENTATION:
@@ -4450,7 +6038,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->SetLineIndentation(l1,l2);
-                rv=false;
+                paramIntSetter(m_CodeLog,"SetLineIndentation",l1,l2);
             }
             break;
         case SCI_GETLINEINDENTATION:
@@ -4460,7 +6048,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetLineIndentation(l1) );
-                rv=true;
+                paramGetter(m_CodeLog,"GetLineIndentation", l1);
             }
             break;
         case SCI_GETLINEINDENTPOSITION:
@@ -4470,13 +6058,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetLineIndentPosition(l1) );
-                rv=true;
+                paramGetter(m_CodeLog,"GetLineIndentPosition", l1);
             }
             break;
         case SCI_SETINDENTATIONGUIDES:
             {
                 m_scintilla1->SetIndentationGuides( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetIndentationGuides");
             }
             break;
         case SCI_GETINDENTATIONGUIDES:
@@ -4503,7 +6091,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown indentation guides value)",i));
                 }
-                rv=true;
+                basicGetter(m_CodeLog,"GetIndentationGuides");
             }
             break;
         case SCI_SETHIGHLIGHTGUIDE:
@@ -4513,13 +6101,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 //                long l1 = it.GetProperty()->GetValue();
 
                 m_scintilla1->SetHighlightGuide( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetHighlightGuide");
             }
             break;
         case SCI_GETHIGHLIGHTGUIDE:
             {
                 property->SetValueFromInt( m_scintilla1->GetHighlightGuide() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetHighlightGuide");
             }
             break;
         case SCI_MARKERDEFINE:
@@ -4573,6 +6161,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                             property->SetValueFromInt(val);
                         }
                     }
+
+                    wxString cl = "m_stc->MarkerDefine(";
+                    cl << msd->get_style();
+                    cl << ",";
+                    cl << wxSTC_MARK_CHARACTER + dlg.GetSymbolChar();
+                    cl <<");\n";
+                    m_CodeLog->AppendText(cl);
+
                 }
                 else
                 {
@@ -4582,9 +6178,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     markerDefineRGBAImage[j]->SetValueToUnspecified();
                     markerDefinePixmap[j]->SetValueToUnspecified();
                     markerDefinePixmap2[j]->SetValueToUnspecified();
+
+                    styleEnumSetter2(m_CodeLog,m_propgrid, property,"MarkerDefine");
                 }
 
-                rv=false;
+
             }
             break;
         case SCI_MARKERDEFINECHARACTER:
@@ -4616,8 +6214,6 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     markerDefineCharacter[j]->SetValueFromString(wxString::Format("%d - '%s'",dlg.GetSymbolChar(),dlg.GetSymbol()));
                     m_scintilla1->MarkerDefine( j, wxSTC_MARK_CHARACTER + dlg.GetSymbolChar() );
                 }
-
-                rv=false;
             }
             break;
         case SCI_MARKERDEFINEPIXMAP:
@@ -4636,9 +6232,25 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     markerDefinitions[j]->SetValueToUnspecified();
                     markerDefineRGBAImage[j]->SetValueToUnspecified();
                     markerDefinePixmap2[j]->SetValueToUnspecified();
-                }
 
-                rv=false;
+                    wxString cl2;
+                    wxString cl = "m_stc->MarkerDefineBitmap(";
+                    cl << styleNoOrLable(m_propgrid,property);
+                    cl << ",";
+                    cl2 = cl;
+                    cl << "wxBitmap(\"";
+                    cl << property->GetValueAsString();
+                    cl << "\",wxBITMAP_TYPE_ANY));\n";
+
+                   appendOrOverwrite(m_CodeLog,cl,cl2);
+                }
+                else
+                {
+                    wxString cl = "//wxWidgets can't open \"";
+                    cl << property->GetValueAsString();
+                    cl << "\"\n";
+                    appendOrOverwrite(m_CodeLog,cl,cl);
+                }
             }
             break;
         case SCI_RGBAIMAGESETWIDTH:
@@ -4653,7 +6265,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     }
                 }
                 m_scintilla1->RGBAImageSetWidth( l );
-                rv=false;
+                styleIntSetter2(m_CodeLog,m_propgrid, property,"RGBAImageSetWidth");
             }
             break;
         case SCI_RGBAIMAGESETHEIGHT:
@@ -4668,7 +6280,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     }
                 }
                 m_scintilla1->RGBAImageSetHeight( l );
-                rv=false;
+                styleIntSetter2(m_CodeLog,m_propgrid, property,"RGBAImageSetHeight");
             }
             break;
         case SCI_MARKERDEFINERGBAIMAGE:
@@ -4714,7 +6326,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     }
                 }
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for MarkerDefineRGBAImage is not implimented yet!\n");
             }
             break;
         case SCI_MARKERSYMBOLDEFINED:
@@ -4856,7 +6468,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown marker symbol)",i));
                 }
-                rv=true;
+                styleGetter(m_CodeLog,m_propgrid, property,"GetMarkerSymbolDefined");
             }
             break;
         case SCI_MARKERSETFORE:
@@ -4866,7 +6478,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 wxAny value = property->GetValue();
                 m_scintilla1->MarkerSetForeground( msd->get_style(),value.As<wxColour>() );
-                rv=false;
+
+                styleColorSetter2(m_CodeLog,m_propgrid, property,"MarkerSetForeground");
             }
             break;
         case SCI_MARKERSETBACK:
@@ -4876,7 +6489,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 wxAny value = property->GetValue();
                 m_scintilla1->MarkerSetBackground( msd->get_style(),value.As<wxColour>() );
-                rv=false;
+
+                styleColorSetter2(m_CodeLog,m_propgrid, property,"MarkerSetBackground");
             }
             break;
         case SCI_MARKERSETBACKSELECTED:
@@ -4886,7 +6500,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 wxAny value = property->GetValue();
                 m_scintilla1->MarkerSetBackgroundSelected( msd->get_style(),value.As<wxColour>() );
-                rv=false;
+
+                styleColorSetter2(m_CodeLog,m_propgrid, property,"MarkerSetBackgroundSelected");
             }
             break;
         case SCI_MARKERENABLEHIGHLIGHT:
@@ -4902,7 +6517,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     }
                 }
                 m_scintilla1->MarkerEnableHighlight( property->GetValue().GetBool() );
-                rv=false;
+
+                appendOrOverwrite2Bool(m_CodeLog,property,"MarkerEnableHighlight");
             }
             break;
         case SCI_MARKERSETALPHA:
@@ -4911,7 +6527,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 m_scintilla1->MarkerSetAlpha( msd->get_style(),property->GetValue().GetLong() );
-                rv=false;
+
+                appendOrOverwrite2Int(m_CodeLog,property,"MarkerSetAlpha");
             }
             break;
         case SCI_MARKERDEFINEALT:
@@ -4934,7 +6551,11 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 markerDefinePixmap[j]->SetValueToUnspecified();
                 markerDefineRGBAImage[j]->SetValueToUnspecified();
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for SCI_MARKERDEFINEPIXMAP is not implimented yet!\n");
+                m_CodeLog->AppendText("//what needs to be done is:\n");
+                m_CodeLog->AppendText("//1) include the xpm file with a line such as \'#include \"gem_blue.xpm\"\'\n");
+                m_CodeLog->AppendText("//2) send message 2049 with the first parameter being the marker number and second parameter being the character array defined in that xpm file\n");
+                m_CodeLog->AppendText("//   for example, m_stc->SendMsg( 2049, 0, reinterpret_cast<wxIntPtr>(bookmarkBluegem ));\n");
             }
             break;
         case SCI_MARKERADD:
@@ -4954,8 +6575,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     buildMarkerEnums();
                 }
 
-                //if we return true, this method will get called a second time
-                rv=false;
+                twoIntSetter(m_CodeLog,"m_stc->MarkerAdd",l1,l2);
             }
             break;
         case SCI_MARKERADDSET:
@@ -4977,7 +6597,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 //SCI_MARKERMARKERFROMHANDLE message to go along with SCI_MARKERLINEFROMHANDLE.
 
                 m_scintilla1->MarkerAddSet(l1,l2);
-                rv=false;
+                twoIntSetter(m_CodeLog,"m_stc->MarkerAddSet",l1,l2);
             }
             break;
         case SCI_MARKERDELETE:
@@ -5032,8 +6652,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                         }
                     }
                 }
-
-                rv=false;
+                twoIntSetter(m_CodeLog,"m_stc->MarkerDelete",l1,l2);
             }
             break;
         case SCI_MARKERDELETEALL:
@@ -5077,7 +6696,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
 
-                rv=false;
+                paramGetter(m_CodeLog,"MarkerDeleteAll",l1);
             }
             break;
         case SCI_MARKERGET:
@@ -5102,7 +6721,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv= true;
+                paramGetter(m_CodeLog,"MarkerGet",l1);
             }
             break;
         case SCI_MARKERNEXT:
@@ -5114,7 +6733,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->MarkerNext(l1,l2));
-                rv= true;
+                twoIntSetter(m_CodeLog,"m_stc->MarkerNext",l1,l2);
             }
             break;
         case SCI_MARKERPREVIOUS:
@@ -5126,7 +6745,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->MarkerPrevious(l1,l2));
-                rv= true;
+                twoIntSetter(m_CodeLog,"m_stc->MarkerPrevious",l1,l2);
             }
             break;
         case SCI_MARKERLINEFROMHANDLE:
@@ -5136,7 +6755,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->MarkerLineFromHandle(l1));
-                rv= true;
+                paramGetter(m_CodeLog,"MarkerLineFromHandle",l1);
             }
             break;
         case SCI_MARKERDELETEHANDLE:
@@ -5156,7 +6775,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 m_scintilla1->MarkerDeleteHandle(l1);
-                rv= false;
+                paramGetter(m_CodeLog,"MarkerDeleteHandle",l1);
             }
             break;
 
@@ -5166,7 +6785,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 m_scintilla1->IndicatorSetStyle( msd->get_style() , property->GetValue().GetLong() );
-                rv= false;
+
+                styleEnumSetter2(m_CodeLog,m_propgrid, property,"IndicatorSetStyle");
             }
             break;
         case SCI_INDICGETSTYLE:
@@ -5232,7 +6852,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     property->SetValueFromString(wxString::Format("(%d - unknown indicator style)",i));
                 }
-                rv=true;
+                styleGetter(m_CodeLog,m_propgrid, property,"IndicatorGetStyle");
             }
             break;
         case SCI_INDICSETFORE:
@@ -5242,7 +6862,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 wxAny value = property->GetValue();
                 m_scintilla1->IndicatorSetForeground( msd->get_style() , value.As<wxColour>() );
-                rv=false;
+
+                styleColorSetter2(m_CodeLog,m_propgrid, property,"IndicatorSetForeground");
             }
             break;
         case SCI_INDICGETFORE:
@@ -5255,7 +6876,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 //                wxColour c = m_scintilla1->IndicatorGetForeground (msd->get_style());
 //                property->SetValueFromString( c.GetAsString() );
 
-                rv=true;
+                styleGetter(m_CodeLog,m_propgrid, property,"IndicatorGetForeground");
             }
             break;
         case SCI_INDICSETALPHA:
@@ -5264,7 +6885,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 m_scintilla1->IndicatorSetAlpha( msd->get_style() , property->GetValue().GetLong() );
-                rv=false;
+                styleIntSetter2(m_CodeLog,m_propgrid, property,"IndicatorSetAlpha");
             }
             break;
         case SCI_INDICGETALPHA:
@@ -5273,7 +6894,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 property->SetValueFromInt(  m_scintilla1->IndicatorGetAlpha (msd->get_style()) );
-                rv=true;
+                styleGetter(m_CodeLog,m_propgrid, property,"IndicatorGetAlpha");
             }
             break;
         case SCI_INDICSETOUTLINEALPHA:
@@ -5282,7 +6903,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 m_scintilla1->IndicatorSetOutlineAlpha( msd->get_style() , property->GetValue().GetLong() );
-                rv=false;
+                styleIntSetter2(m_CodeLog,m_propgrid, property,"IndicatorSetOutlineAlpha");
             }
             break;
         case SCI_INDICGETOUTLINEALPHA:
@@ -5291,7 +6912,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 property->SetValueFromInt(  m_scintilla1->IndicatorGetOutlineAlpha (msd->get_style()) );
-                rv=true;
+                styleGetter(m_CodeLog,m_propgrid, property,"IndicatorGetOutlineAlpha");
             }
             break;
         case SCI_INDICSETUNDER:
@@ -5300,7 +6921,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 m_scintilla1->IndicatorSetUnder( msd->get_style(), property->GetValue().GetBool() );
-                rv=false;
+                styleBoolSetter2(m_CodeLog,m_propgrid, property,"IndicatorSetUnder");
             }
             break;
         case SCI_INDICGETUNDER:
@@ -5309,7 +6930,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 myStyleData* msd = dynamic_cast<myStyleData*>(par->GetClientObject());
 
                 property->SetValueFromString(m_scintilla1->IndicatorGetUnder(msd->get_style())?"True":"False");
-                rv=true;
+                styleGetter(m_CodeLog,m_propgrid, property,"IndicatorGetUnder");
             }
             break;
         case SCI_MODERNINDICATORS:
@@ -5320,25 +6941,25 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
         case SCI_SETINDICATORCURRENT:
             {
                 m_scintilla1->SetIndicatorCurrent( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetIndicatorCurrent");
             }
             break;
         case SCI_GETINDICATORCURRENT:
             {
                 property->SetValueFromInt(m_scintilla1->GetIndicatorCurrent());
-                rv=true;
+                basicGetter(m_CodeLog,"GetIndicatorCurrent");
             }
             break;
         case SCI_SETINDICATORVALUE:
             {
                 m_scintilla1->SetIndicatorValue( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetIndicatorValue");
             }
             break;
         case SCI_GETINDICATORVALUE:
             {
                 property->SetValueFromInt( m_scintilla1->GetIndicatorValue() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetIndicatorValue");
             }
             break;
         case SCI_INDICATORFILLRANGE:
@@ -5350,7 +6971,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->IndicatorFillRange(l1,l2);
-                rv= false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->IndicatorFillRange",l1,l2);
             }
             break;
         case SCI_INDICATORCLEARRANGE:
@@ -5362,7 +6983,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->IndicatorClearRange(l1,l2);
-                rv= false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->IndicatorClearRange",l1,l2);
             }
             break;
         case SCI_INDICATORALLONFOR:
@@ -5387,7 +7008,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv= true;
+                paramGetter(m_CodeLog,"IndicatorAllOnFor",l1);
             }
             break;
         case SCI_INDICATORVALUEAT:
@@ -5399,7 +7020,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->IndicatorValueAt(l1,l2));
-                rv= true;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->IndicatorValueAt",l1,l2);
             }
             break;
         case SCI_INDICATORSTART:
@@ -5411,7 +7032,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->IndicatorStart(l1,l2));
-                rv= true;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->IndicatorStart",l1,l2);
             }
             break;
         case SCI_INDICATOREND:
@@ -5423,7 +7044,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->IndicatorEnd(l1,l2));
-                rv= true;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->IndicatorEnd",l1,l2);
             }
             break;
         case SCI_OSXFINDINDICATOR:
@@ -5441,7 +7062,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->SendMsg(2640,l1,l2);
                 statusBar->SetStatusText("OS X find indicator shown.", 1);
-                rv= false;
+                m_CodeLog->AppendText("//code generation for SCI_FINDINDICATORSHOW is not implimented yet!\n");
             }
             break;
         case SCI_FINDINDICATORFLASH:
@@ -5454,14 +7075,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->SendMsg(2641,l1,l2);
                 statusBar->SetStatusText("OS X find indicator flashing.", 1);
-                rv= false;
+                m_CodeLog->AppendText("//code generation for SCI_FINDINDICATORFLASH is not implimented yet!\n");
             }
             break;
         case SCI_FINDINDICATORHIDE:
             {
                 m_scintilla1->SendMsg(2642,0,0);
                 statusBar->SetStatusText("OS X find indicator hidden.", 1);
-                rv= false;
+                m_CodeLog->AppendText("//code generation for SCI_FINDINDICATORHIDE is not implimented yet!\n");
             }
             break;
 
@@ -5474,31 +7095,31 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty()->GetValue();
 
                 m_scintilla1->AutoCompShow(l1,s);
-                rv= false;
+                appendOrOverwriteIntString(m_CodeLog,"m_stc->AutoCompShow",l1,s);
             }
             break;
         case SCI_AUTOCCANCEL:
             {
                 m_scintilla1->AutoCompCancel();
-                rv= false;
+                basicGetter(m_CodeLog,"AutoCompCancel");
             }
             break;
         case SCI_AUTOCACTIVE:
             {
                 property->SetValueFromString(m_scintilla1->AutoCompActive()?"True":"False");
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompActive");
             }
             break;
         case SCI_AUTOCPOSSTART:
             {
                 property->SetValueFromInt( m_scintilla1->AutoCompPosStart() );
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompPosStart");
             }
             break;
         case SCI_AUTOCCOMPLETE:
             {
                 m_scintilla1->AutoCompComplete();
-                rv= false;
+                basicGetter(m_CodeLog,"AutoCompComplete");
             }
             break;
         case SCI_AUTOCSTOPS:
@@ -5509,7 +7130,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->AutoCompStops(s);
 
-                rv= false;
+                appendOrOverwriteString(m_CodeLog,"m_stc->AutoCompStops",s);
             }
             break;
         case SCI_AUTOCSETSEPARATOR:
@@ -5528,6 +7149,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                         //some reason, that makes the dialog appear a second time.  returning
                         //false seems to prevent that and doesn't seem to cause any other problems
                         rv= false;
+                        appendOrOverwriteInt(m_CodeLog,"m_stc->AutoCompSetSeparator",dlg.GetSymbolChar());
                     }
                     else
                     {
@@ -5545,7 +7167,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = (char)m_scintilla1->AutoCompGetSeparator();
 
                 property->SetValueFromString( wxString::Format("%d - '%s'",m_scintilla1->AutoCompGetSeparator(),s)  );
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetSeparator");
             }
             break;
         case SCI_AUTOCSELECT:
@@ -5555,13 +7177,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty()->GetValue();
 
                 m_scintilla1->AutoCompSelect(s);
-                rv= false;
+                appendOrOverwriteString(m_CodeLog,"m_stc->AutoCompSelect",s);
             }
             break;
         case SCI_AUTOCGETCURRENT:
             {
                 property->SetValueFromInt( m_scintilla1->AutoCompGetCurrent() );
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetCurrent");
             }
             break;
         case SCI_AUTOCGETCURRENTTEXT:
@@ -5583,19 +7205,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(buf);
                 }
 
-                rv=true;
+                m_CodeLog->AppendText("//code generation for SCI_AUTOCGETCURRENTTEXT is not implimented yet!\n");
             }
             break;
         case SCI_AUTOCSETCANCELATSTART:
             {
                 m_scintilla1->AutoCompSetCancelAtStart(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"AutoCompSetCancelAtStart");
             }
             break;
         case SCI_AUTOCGETCANCELATSTART:
             {
                 property->SetValueFromString(m_scintilla1->AutoCompGetCancelAtStart()?"True":"False");
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetCancelAtStart");
             }
             break;
         case SCI_AUTOCSETFILLUPS:
@@ -5605,37 +7227,37 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 //                wxString s = it.GetProperty()->GetValue();
 
                 m_scintilla1->AutoCompSetFillUps(property->GetValue().GetString());
-                rv= false;
+                appendOrOverwriteString(m_CodeLog,"m_stc->AutoCompSetFillUps",property->GetValue().GetString());
             }
             break;
         case SCI_AUTOCSETCHOOSESINGLE:
             {
                 m_scintilla1->AutoCompSetChooseSingle(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"AutoCompSetChooseSingle");
             }
             break;
         case SCI_AUTOCGETCHOOSESINGLE:
             {
                 property->SetValueFromString(m_scintilla1->AutoCompGetChooseSingle()?"True":"False");
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetChooseSingle");
             }
             break;
         case SCI_AUTOCSETIGNORECASE:
             {
                 m_scintilla1->AutoCompSetIgnoreCase(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"AutoCompSetIgnoreCase");
             }
             break;
         case SCI_AUTOCGETIGNORECASE:
             {
                 property->SetValueFromString(m_scintilla1->AutoCompGetIgnoreCase()?"True":"False");
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetIgnoreCase");
             }
             break;
         case SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR:
             {
                 m_scintilla1->AutoCompSetCaseInsensitiveBehaviour(property->GetValue().GetLong());
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"AutoCompSetCaseInsensitiveBehaviour");
             }
             break;
         case SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR:
@@ -5655,31 +7277,31 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown caseinsensitive behaviour)",i));
                 }
 
-				rv=true;
+				basicGetter(m_CodeLog,"AutoCompGetCaseInsensitiveBehaviour");
             }
             break;
         case SCI_AUTOCSETAUTOHIDE:
             {
                 m_scintilla1->AutoCompSetAutoHide(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"AutoCompSetAutoHide");
             }
             break;
         case SCI_AUTOCGETAUTOHIDE:
             {
                 property->SetValueFromString(m_scintilla1->AutoCompGetAutoHide()?"True":"False");
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetAutoHide");
             }
             break;
         case SCI_AUTOCSETDROPRESTOFWORD:
             {
                 m_scintilla1->AutoCompSetDropRestOfWord(property->GetValue().GetBool());
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"AutoCompSetDropRestOfWord");
             }
             break;
         case SCI_AUTOCGETDROPRESTOFWORD:
             {
                 property->SetValueFromString(m_scintilla1->AutoCompGetDropRestOfWord()?"True":"False");
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetDropRestOfWord");
             }
             break;
         case SCI_REGISTERIMAGE:
@@ -5696,9 +7318,25 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 {
                     addRegisteredImage(l1, s);
                     m_scintilla1->RegisterImage( l1 , bm );
-                }
 
-                rv=false;
+                    wxString cl = "m_stc->RegisterImage(";
+                    cl << (int)l1;
+                    cl << ",";
+                    wxString cl2 = cl;
+                    cl << "wxBitmap(\"";
+                    cl << s;
+                    cl << "\",wxBITMAP_TYPE_ANY) );\n";
+
+                    appendOrOverwrite(m_CodeLog,cl,cl2);
+                }
+                else
+                {
+                    wxString cl = "wxWidgets is unable to open ";
+                    cl << s;
+                    cl << "\n";
+
+                    appendOrOverwrite(m_CodeLog,cl,cl);
+                }
             }
             break;
         case SCI_REGISTERRGBAIMAGE:
@@ -5727,7 +7365,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     m_scintilla1->RegisterRGBAImage( l1 , c );
                 }
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for RegisterRGBAImage is not implimented yet!\n");
             }
             break;
         case SCI_CLEARREGISTEREDIMAGES:
@@ -5749,7 +7387,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
                 registeredACRGBAData.clear();
 
-                rv=false;
+                basicGetter(m_CodeLog,"ClearRegisteredImages");
             }
             break;
         case SCI_AUTOCSETTYPESEPARATOR:
@@ -5769,6 +7407,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                         //some reason, that makes the dialog appear a second time.  returning
                         //false seems to prevent that and doesn't seem to cause any other problems
                         rv= false;
+
+                        appendOrOverwriteInt(m_CodeLog,"m_stc->AutoCompSetTypeSeparator",dlg.GetSymbolChar());
                     }
                     else
                     {
@@ -5786,31 +7426,31 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = (char)m_scintilla1->AutoCompGetTypeSeparator();
 
                 property->SetValueFromString( wxString::Format("%d - '%s'",m_scintilla1->AutoCompGetTypeSeparator(),s)  );
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetTypeSeparator");
             }
             break;
         case SCI_AUTOCSETMAXHEIGHT:
             {
                 m_scintilla1->AutoCompSetMaxHeight( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"AutoCompSetMaxHeight");
             }
             break;
         case SCI_AUTOCGETMAXHEIGHT:
             {
                 property->SetValueFromInt(m_scintilla1->AutoCompGetMaxHeight());
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetMaxHeight");
             }
             break;
         case SCI_AUTOCSETMAXWIDTH:
             {
                 m_scintilla1->AutoCompSetMaxWidth( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"AutoCompSetMaxWidth");
             }
             break;
         case SCI_AUTOCGETMAXWIDTH:
             {
                 property->SetValueFromInt(m_scintilla1->AutoCompGetMaxWidth());
-                rv= true;
+                basicGetter(m_CodeLog,"AutoCompGetMaxWidth");
             }
             break;
 
@@ -5827,7 +7467,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 addRegisteredImage(l1, s);
                 m_scintilla1->SendMsg(2405, l1, l2 );
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for SCI_REGISTERIMAGE2 is not implimented yet!\n");
             }
             break;
         case SCI_USERLISTSHOW:
@@ -5839,7 +7479,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s = it.GetProperty()->GetValue();
 
                 m_scintilla1->UserListShow(l1,s);
-                rv= false;
+
+                appendOrOverwriteIntString(m_CodeLog,"m_stc->UserListShow",l1,s);
             }
             break;
         case SCI_CALLTIPSHOW:
@@ -5855,25 +7496,25 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 s.Replace("\\t","\t",true);
 
                 m_scintilla1->CallTipShow(l1,s);
-                rv= false;
+                appendOrOverwriteIntString(m_CodeLog,"m_stc->CallTipShow",l1,s);
             }
             break;
         case SCI_CALLTIPCANCEL:
             {
                 m_scintilla1->CallTipCancel();
-                rv= false;
+                basicGetter(m_CodeLog,"CallTipCancel");
             }
             break;
         case SCI_CALLTIPACTIVE:
             {
                 property->SetValueFromString(m_scintilla1->CallTipActive()?"True":"False");
-                rv= true;
+                basicGetter(m_CodeLog,"CallTipActive");
             }
             break;
         case SCI_CALLTIPPOSSTART:
             {
                 property->SetValueFromInt(m_scintilla1->CallTipPosAtStart());
-                rv= true;
+                basicGetter(m_CodeLog,"CallTipPosAtStart");
             }
             break;
         case SCI_CALLTIPSETHLT:
@@ -5886,28 +7527,28 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 m_scintilla1->CallTipSetHighlight(l1,l2);
                 statusBar->SetStatusText(wxString::Format("Call tip highlight set from %d to %d",l1,l2), 1);
-                rv= false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->CallTipSetHighlight",l1,l2);
             }
             break;
         case SCI_CALLTIPSETBACK:
             {
                 wxAny value = property->GetValue();
                 m_scintilla1->CallTipSetBackground( value.As<wxColour>() );
-                rv=false;
+                appendOrOverwriteColor(m_CodeLog,"m_stc->CallTipSetBackground",  value.As<wxColour>());
             }
             break;
         case SCI_CALLTIPSETFORE:
             {
                 wxAny value = property->GetValue();
                 m_scintilla1->CallTipSetForeground( value.As<wxColour>() );
-                rv=false;
+                appendOrOverwriteColor(m_CodeLog,"m_stc->CallTipSetForeground",  value.As<wxColour>());
             }
             break;
         case SCI_CALLTIPSETFOREHLT:
             {
                 wxAny value = property->GetValue();
                 m_scintilla1->CallTipSetForegroundHighlight( value.As<wxColour>() );
-                rv=false;
+                appendOrOverwriteColor(m_CodeLog,"m_stc->CallTipSetForegroundHighlight",  value.As<wxColour>());
             }
             break;
         case SCI_CALLTIPUSESTYLE:
@@ -5919,536 +7560,536 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 m_scintilla1->CallTipUseStyle(l1);
 
                 statusBar->SetStatusText("Call tip style set to wxSTC_STYLE_CALLTIP.", 1);
-                rv= false;
+                appendOrOverwriteInt(m_CodeLog,"m_stc->CallTipUseStyle",l1);
             }
             break;
         case SCI_CALLTIPSETPOSITION:
             {
                 m_scintilla1->CallTipSetPosition( property->GetValue().GetBool() );
-                rv= false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"CallTipSetPosition");
             }
             break;
 
         case SCI_LINEDOWN:
             {
                 m_scintilla1->LineDown();
-                rv=false;
+                basicGetter(m_CodeLog,"LineDown");
             }
             break;
         case SCI_LINEDOWNEXTEND:
             {
                 m_scintilla1->LineDownExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineDownExtend");
             }
             break;
         case SCI_LINEDOWNRECTEXTEND:
             {
                 m_scintilla1->LineDownRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineDownRectExtend");
             }
             break;
         case SCI_LINESCROLLDOWN:
             {
                 m_scintilla1->LineScrollDown();
-                rv=false;
+                basicGetter(m_CodeLog,"LineScrollDown");
             }
             break;
         case SCI_LINEUP:
             {
                 m_scintilla1->LineUp();
-                rv=false;
+                basicGetter(m_CodeLog,"LineUp");
             }
             break;
         case SCI_LINEUPEXTEND:
             {
                 m_scintilla1->LineUpExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineUpExtend");
             }
             break;
         case SCI_LINEUPRECTEXTEND:
             {
                 m_scintilla1->LineUpRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineUpRectExtend");
             }
             break;
         case SCI_LINESCROLLUP:
             {
                 m_scintilla1->LineScrollUp();
-                rv=false;
+                basicGetter(m_CodeLog,"LineScrollUp");
             }
             break;
         case SCI_PARADOWN:
             {
                 m_scintilla1->ParaDown();
-                rv=false;
+                basicGetter(m_CodeLog,"ParaDown");
             }
             break;
         case SCI_PARADOWNEXTEND:
             {
                 m_scintilla1->ParaDownExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"ParaDownExtend");
             }
             break;
         case SCI_PARAUP:
             {
                 m_scintilla1->ParaUp();
-                rv=false;
+                basicGetter(m_CodeLog,"ParaUp");
             }
             break;
         case SCI_PARAUPEXTEND:
             {
                 m_scintilla1->ParaUpExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"ParaUpExtend");
             }
             break;
         case SCI_CHARLEFT:
             {
                 m_scintilla1->CharLeft();
-                rv=false;
+                basicGetter(m_CodeLog,"CharLeft");
             }
             break;
         case SCI_CHARLEFTEXTEND:
             {
                 m_scintilla1->CharLeftExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"CharLeftExtend");
             }
             break;
         case SCI_CHARLEFTRECTEXTEND:
             {
                 m_scintilla1->CharLeftRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"CharLeftRectExtend");
             }
             break;
         case SCI_CHARRIGHT:
             {
                 m_scintilla1->CharRight();
-                rv=false;
+                basicGetter(m_CodeLog,"CharRight");
             }
             break;
         case SCI_CHARRIGHTEXTEND:
             {
                 m_scintilla1->CharRightExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"CharRightExtend");
             }
             break;
         case SCI_CHARRIGHTRECTEXTEND:
             {
                 m_scintilla1->CharRightRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"CharRightRectExtend");
             }
             break;
         case SCI_WORDLEFT:
             {
                 m_scintilla1->WordLeft();
-                rv=false;
+                basicGetter(m_CodeLog,"WordLeft");
             }
             break;
         case SCI_WORDLEFTEXTEND:
             {
                 m_scintilla1->WordLeftExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"WordLeftExtend");
             }
             break;
         case SCI_WORDRIGHT:
             {
                 m_scintilla1->WordRight();
-                rv=false;
+                basicGetter(m_CodeLog,"WordRight");
             }
             break;
         case SCI_WORDRIGHTEXTEND:
             {
                 m_scintilla1->WordRightExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"WordRightExtend");
             }
             break;
         case SCI_WORDLEFTEND:
             {
                 m_scintilla1->WordLeftEnd();
-                rv=false;
+                basicGetter(m_CodeLog,"WordLeftEnd");
             }
             break;
         case SCI_WORDLEFTENDEXTEND:
             {
                 m_scintilla1->WordLeftEndExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"WordLeftEndExtend");
             }
             break;
         case SCI_WORDRIGHTEND:
             {
                 m_scintilla1->WordRightEnd();
-                rv=false;
+                basicGetter(m_CodeLog,"WordRightEnd");
             }
             break;
         case SCI_WORDRIGHTENDEXTEND:
             {
                 m_scintilla1->WordRightEndExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"WordRightEndExtend");
             }
             break;
         case SCI_WORDPARTLEFT:
             {
                 m_scintilla1->WordPartLeft();
-                rv=false;
+                basicGetter(m_CodeLog,"WordPartLeft");
             }
             break;
         case SCI_WORDPARTLEFTEXTEND:
             {
                 m_scintilla1->WordPartLeftExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"WordPartLeftExtend");
             }
             break;
         case SCI_WORDPARTRIGHT:
             {
                 m_scintilla1->WordPartRight();
-                rv=false;
+                basicGetter(m_CodeLog,"WordPartRight");
             }
             break;
         case SCI_WORDPARTRIGHTEXTEND:
             {
                 m_scintilla1->WordPartRightExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"WordPartRightExtend");
             }
             break;
         case SCI_HOME:
             {
                 m_scintilla1->Home();
-                rv=false;
+                basicGetter(m_CodeLog,"Home");
             }
             break;
         case SCI_HOMEEXTEND:
             {
                 m_scintilla1->HomeExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"HomeExtend");
             }
             break;
         case SCI_HOMERECTEXTEND:
             {
                 m_scintilla1->HomeRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"HomeRectExtend");
             }
             break;
         case SCI_HOMEDISPLAY:
             {
                 m_scintilla1->HomeDisplay();
-                rv=false;
+                basicGetter(m_CodeLog,"HomeDisplay");
             }
             break;
         case SCI_HOMEDISPLAYEXTEND:
             {
                 m_scintilla1->HomeDisplayExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"HomeDisplayExtend");
             }
             break;
         case SCI_HOMEWRAP:
             {
                 m_scintilla1->HomeWrap();
-                rv=false;
+                basicGetter(m_CodeLog,"HomeWrap");
             }
             break;
         case SCI_HOMEWRAPEXTEND:
             {
                 m_scintilla1->HomeWrapExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"HomeWrapExtend");
             }
             break;
         case SCI_VCHOME:
             {
                 m_scintilla1->VCHome();
-                rv=false;
+                basicGetter(m_CodeLog,"VCHome");
             }
             break;
         case SCI_VCHOMEEXTEND:
             {
                 m_scintilla1->VCHomeExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"VCHomeExtend");
             }
             break;
         case SCI_VCHOMERECTEXTEND:
             {
                 m_scintilla1->VCHomeRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"VCHomeRectExtend");
             }
             break;
         case SCI_VCHOMEWRAP:
             {
                 m_scintilla1->VCHomeWrap();
-                rv=false;
+                basicGetter(m_CodeLog,"VCHomeWrap");
             }
             break;
         case SCI_VCHOMEWRAPEXTEND:
             {
                 m_scintilla1->VCHomeWrapExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"VCHomeWrapExtend");
             }
             break;
         case SCI_LINEEND:
             {
                 m_scintilla1->LineEnd();
-                rv=false;
+                basicGetter(m_CodeLog,"LineEnd");
             }
             break;
         case SCI_LINEENDEXTEND:
             {
                 m_scintilla1->LineEndExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineEndExtend");
             }
             break;
         case SCI_LINEENDRECTEXTEND:
             {
                 m_scintilla1->LineEndRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineEndRectExtend");
             }
             break;
         case SCI_LINEENDDISPLAY:
             {
                 m_scintilla1->LineEndDisplay();
-                rv=false;
+                basicGetter(m_CodeLog,"LineEndDisplay");
             }
             break;
         case SCI_LINEENDDISPLAYEXTEND:
             {
                 m_scintilla1->LineEndDisplayExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineEndDisplayExtend");
             }
             break;
         case SCI_LINEENDWRAP:
             {
                 m_scintilla1->LineEndWrap();
-                rv=false;
+                basicGetter(m_CodeLog,"LineEndWrap");
             }
             break;
         case SCI_LINEENDWRAPEXTEND:
             {
                 m_scintilla1->LineEndWrapExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"LineEndWrapExtend");
             }
             break;
         case SCI_DOCUMENTSTART:
             {
                 m_scintilla1->DocumentStart();
-                rv=false;
+                basicGetter(m_CodeLog,"DocumentStart");
             }
             break;
         case SCI_DOCUMENTSTARTEXTEND:
             {
                 m_scintilla1->DocumentStartExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"DocumentStartExtend");
             }
             break;
         case SCI_DOCUMENTEND:
             {
                 m_scintilla1->DocumentEnd();
-                rv=false;
+                basicGetter(m_CodeLog,"DocumentEnd");
             }
             break;
         case SCI_DOCUMENTENDEXTEND:
             {
                 m_scintilla1->DocumentEndExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"DocumentEndExtend");
             }
             break;
         case SCI_PAGEUP:
             {
                 m_scintilla1->PageUp();
-                rv=false;
+                basicGetter(m_CodeLog,"PageUp");
             }
             break;
         case SCI_PAGEUPEXTEND:
             {
                 m_scintilla1->PageUpExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"PageUpExtend");
             }
             break;
         case SCI_PAGEUPRECTEXTEND:
             {
                 m_scintilla1->PageUpRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"PageUpRectExtend");
             }
             break;
         case SCI_PAGEDOWN:
             {
                 m_scintilla1->PageDown();
-                rv=false;
+                basicGetter(m_CodeLog,"PageDown");
             }
             break;
         case SCI_PAGEDOWNEXTEND:
             {
                 m_scintilla1->PageDownExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"PageDownExtend");
             }
             break;
         case SCI_PAGEDOWNRECTEXTEND:
             {
                 m_scintilla1->PageDownRectExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"PageDownRectExtend");
             }
             break;
         case SCI_STUTTEREDPAGEUP:
             {
                 m_scintilla1->StutteredPageUp();
-                rv=false;
+                basicGetter(m_CodeLog,"StutteredPageUp");
             }
             break;
         case SCI_STUTTEREDPAGEUPEXTEND:
             {
                 m_scintilla1->StutteredPageUpExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"StutteredPageUpExtend");
             }
             break;
         case SCI_STUTTEREDPAGEDOWN:
             {
                 m_scintilla1->StutteredPageDown();
-                rv=false;
+                basicGetter(m_CodeLog,"StutteredPageDown");
             }
             break;
         case SCI_STUTTEREDPAGEDOWNEXTEND:
             {
                 m_scintilla1->StutteredPageDownExtend();
-                rv=false;
+                basicGetter(m_CodeLog,"StutteredPageDownExtend");
             }
             break;
         case SCI_DELETEBACK:
             {
                 m_scintilla1->DeleteBack();
-                rv=false;
+                basicGetter(m_CodeLog,"DeleteBack");
             }
             break;
         case SCI_DELETEBACKNOTLINE:
             {
                 m_scintilla1->DeleteBackNotLine();
-                rv=false;
+                basicGetter(m_CodeLog,"DeleteBackNotLine");
             }
             break;
         case SCI_DELWORDLEFT:
             {
                 m_scintilla1->DelWordLeft();
-                rv=false;
+                basicGetter(m_CodeLog,"DelWordLeft");
             }
             break;
         case SCI_DELWORDRIGHT:
             {
                 m_scintilla1->DelWordRight();
-                rv=false;
+                basicGetter(m_CodeLog,"DelWordRight");
             }
             break;
         case SCI_DELWORDRIGHTEND:
             {
                 m_scintilla1->DelWordRightEnd();
-                rv=false;
+                basicGetter(m_CodeLog,"DelWordRightEnd");
             }
             break;
         case SCI_DELLINELEFT:
             {
                 m_scintilla1->DelLineLeft();
-                rv=false;
+                basicGetter(m_CodeLog,"DelLineLeft");
             }
             break;
         case SCI_DELLINERIGHT:
             {
                 m_scintilla1->DelLineRight();
-                rv=false;
+                basicGetter(m_CodeLog,"DelLineRight");
             }
             break;
         case SCI_LINEDELETE:
             {
                 m_scintilla1->LineDelete();
-                rv=false;
+                basicGetter(m_CodeLog,"LineDelete");
             }
             break;
         case SCI_LINECUT:
             {
                 m_scintilla1->LineCut();
-                rv=false;
+                basicGetter(m_CodeLog,"LineCut");
             }
             break;
         case SCI_LINECOPY:
             {
                 m_scintilla1->LineCopy();
-                rv=false;
+                basicGetter(m_CodeLog,"LineCopy");
             }
             break;
         case SCI_LINETRANSPOSE:
             {
                 m_scintilla1->LineTranspose();
-                rv=false;
+                basicGetter(m_CodeLog,"LineTranspose");
             }
             break;
         case SCI_LINEDUPLICATE:
             {
                 m_scintilla1->LineDuplicate();
-                rv=false;
+                basicGetter(m_CodeLog,"LineDuplicate");
             }
             break;
         case SCI_LOWERCASE:
             {
                 m_scintilla1->LowerCase();
-                rv=false;
+                basicGetter(m_CodeLog,"LowerCase");
             }
             break;
         case SCI_UPPERCASE:
             {
                 m_scintilla1->UpperCase();
-                rv=false;
+                basicGetter(m_CodeLog,"UpperCase");
             }
             break;
         case SCI_CANCEL:
             {
                 m_scintilla1->Cancel();
-                rv=false;
+                basicGetter(m_CodeLog,"Cancel");
             }
             break;
         case SCI_EDITTOGGLEOVERTYPE:
             {
                 m_scintilla1->EditToggleOvertype();
-                rv=false;
+                basicGetter(m_CodeLog,"EditToggleOvertype");
             }
             break;
         case SCI_NEWLINE:
             {
                 m_scintilla1->NewLine();
-                rv=false;
+                basicGetter(m_CodeLog,"NewLine");
             }
             break;
         case SCI_FORMFEED:
             {
                 m_scintilla1->FormFeed();
-                rv=false;
+                basicGetter(m_CodeLog,"FormFeed");
             }
             break;
         case SCI_TAB:
             {
                 m_scintilla1->Tab();
-                rv=false;
+                basicGetter(m_CodeLog,"Tab");
             }
             break;
         case SCI_BACKTAB:
             {
                 m_scintilla1->BackTab();
-                rv=false;
+                basicGetter(m_CodeLog,"BackTab");
             }
             break;
         case SCI_SELECTIONDUPLICATE:
             {
                 m_scintilla1->SelectionDuplicate();
-                rv=false;
+                basicGetter(m_CodeLog,"SelectionDuplicate");
             }
             break;
         case SCI_VERTICALCENTRECARET:
             {
                 m_scintilla1->VerticalCentreCaret();
-                rv=false;
+                basicGetter(m_CodeLog,"VerticalCentreCaret");
             }
             break;
         case SCI_SCROLLTOSTART:
             {
                 m_scintilla1->ScrollToStart();
-                rv=false;
+                basicGetter(m_CodeLog,"ScrollToStart");
             }
             break;
         case SCI_SCROLLTOEND:
             {
                 m_scintilla1->ScrollToEnd();
-                rv=false;
+                basicGetter(m_CodeLog,"ScrollToEnd");
             }
             break;
 
@@ -6557,7 +8198,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 buildCmdKeyClearEnum();
                 statusBar->SetStatusText( s + " assigned to " + msgName + ".", 1);
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for CmdKeyAssign  is not implimented yet!\n");
             }
             break;
 
@@ -6655,7 +8296,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     buildCmdKeyClearEnum();
                 }
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for CmdKeyClear is not implimented yet!\n");
             }
             break;
         case SCI_CLEARALLCMDKEYS:
@@ -6668,6 +8309,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 keyBindings.clear();
                 buildCmdKeyClearEnum();
                 rv=false;
+
+                basicGetter(m_CodeLog,"CmdKeyClearAll");
             }
             break;
         case SCI_NULL:
@@ -6675,28 +8318,28 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 //this literally does nothing
 
                 m_scintilla1->SendMsg(2172,0,0);
-                rv=false;
+                basicGetter(m_CodeLog,"SendMsg(2172,0,0)");
             }
             break;
 
         case SCI_USEPOPUP:
             {
                 m_scintilla1->UsePopUp( property->GetValue().GetBool() );
-                rv=false;
+                appendOrOverwrite2Bool(m_CodeLog,property,"UsePopUp");
             }
             break;
         case SCI_STARTRECORD:
             {
                 m_scintilla1->StartRecord();
                 statusBar->SetStatusText("Macro recording in progress", 1);
-                rv=false;
+                basicGetter(m_CodeLog,"StartRecord");
             }
             break;
         case SCI_STOPRECORD:
             {
                 m_scintilla1->StopRecord();
                 statusBar->SetStatusText("Macro recording stopped", 1);
-                rv=false;
+                basicGetter(m_CodeLog,"StopRecord");
             }
             break;
         case SCI_FORMATRANGE:
@@ -6743,25 +8386,25 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 md.setbm(test_bitmap);
                 md.ShowModal();
 
-                rv=false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->FormatRange",l1,l2);
             }
             break;
         case SCI_SETPRINTMAGNIFICATION:
             {
                 m_scintilla1->SetPrintMagnification( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetPrintMagnification");
             }
             break;
         case SCI_GETPRINTMAGNIFICATION:
             {
                 property->SetValueFromInt(m_scintilla1->GetPrintMagnification() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetPrintMagnification");
             }
             break;
         case SCI_SETPRINTCOLOURMODE:
             {
                 m_scintilla1->SetPrintColourMode( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetPrintColourMode");
             }
             break;
         case SCI_GETPRINTCOLOURMODE:
@@ -6793,13 +8436,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown print colour mode",i));
                 }
 
-                rv=true;
+                basicGetter(m_CodeLog,"GetPrintColourMode");
             }
             break;
         case SCI_SETPRINTWRAPMODE:
             {
                 m_scintilla1->SetPrintWrapMode( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetPrintWrapMode");
             }
             break;
         case SCI_GETPRINTWRAPMODE:
@@ -6823,23 +8466,23 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown print wrap mode",i));
                 }
 
-                rv=true;
+                basicGetter(m_CodeLog,"GetPrintWrapMode");
             }
             break;
         case SCI_GETDIRECTFUNCTION:
             {
-                rv=false;
+                //rv=false;
             }
             break;
         case SCI_GETDIRECTPOINTER:
             {
-                rv=false;
+                //rv=false;
             }
             break;
         case SCI_GETCHARACTERPOINTER:
             {
                 property->SetValueFromInt(reinterpret_cast<int>(const_cast<char*>( m_scintilla1->GetCharacterPointer()) ));
-                rv=true;
+                basicGetter(m_CodeLog,"GetCharacterPointer");
             }
             break;
         case SCI_GETRANGEPOINTER:
@@ -6851,19 +8494,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(reinterpret_cast<int>(const_cast<char*>( m_scintilla1->GetRangePointer(l1,l2) ) ));
-                rv=true;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->GetRangePointer",l1,l2);
             }
             break;
         case SCI_GETGAPPOSITION:
             {
                 property->SetValueFromInt( m_scintilla1->GetGapPosition() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetGapPosition");
             }
             break;
         case SCI_GETDOCPOINTER:
             {
                 property->SetValueFromInt(reinterpret_cast<int>( m_scintilla1->GetCharacterPointer() ));
-                rv=true;
+                basicGetter(m_CodeLog,"GetCharacterPointer");
             }
             break;
         case SCI_SETDOCPOINTER:
@@ -6906,7 +8549,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 buildMultipleViewsEnums();
 
-                rv=false;
+               m_CodeLog->AppendText("//code generation for SetDocPointer is not implimented yet!\n");
             }
             break;
         case SCI_CREATEDOCUMENT:
@@ -6920,7 +8563,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 buildMultipleViewsEnums();
 
                 property->SetValueFromInt(reinterpret_cast<int>(p));
-                rv=false;
+                basicGetter(m_CodeLog,"CreateDocument");
             }
             break;
         case SCI_ADDREFDOCUMENT:
@@ -6952,7 +8595,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 buildMultipleViewsEnums();
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for AddRefDocument is not implimented yet!\n");
             }
             break;
         case SCI_RELEASEDOCUMENT:
@@ -6988,7 +8631,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 buildMultipleViewsEnums();
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for ReleaseDocument is not implimented yet!\n");
             }
             break;
         case SCI_CREATELOADER:
@@ -7075,7 +8718,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString("Loader creation failed.");
                 }
 
-                rv=false;
+                m_CodeLog->AppendText("//code generation for CreateLoader is not implimented yet!\n");
             }
             break;
 
@@ -7086,7 +8729,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->VisibleFromDocLine(l1) );
-                rv=true;
+                paramGetter(m_CodeLog,"VisibleFromDocLine",l1);
             }
             break;
         case SCI_DOCLINEFROMVISIBLE:
@@ -7096,7 +8739,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->DocLineFromVisible(l1) );
-                rv=true;
+                paramGetter(m_CodeLog,"DocLineFromVisible",l1);
             }
             break;
         case SCI_SHOWLINES:
@@ -7108,7 +8751,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->ShowLines(l1,l2) ;
-                rv=false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->ShowLines",l1,l2);
             }
             break;
         case SCI_HIDELINES:
@@ -7120,7 +8763,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->HideLines(l1,l2);
-                rv=false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->HideLines",l1,l2);
             }
             break;
         case SCI_GETLINEVISIBLE:
@@ -7130,13 +8773,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromString(m_scintilla1->GetLineVisible(l1)?"True":"False");
-                rv=true;
+
+                paramGetter(m_CodeLog,"GetLineVisible",l1);
             }
             break;
         case SCI_GETALLLINESVISIBLE:
             {
                 property->SetValueFromString(m_scintilla1->GetAllLinesVisible()?"True":"False");
-                rv=true;
+                basicGetter(m_CodeLog,"GetAllLinesVisible");
             }
             break;
         case SCI_SETFOLDLEVEL:
@@ -7150,7 +8794,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l3 = it.GetProperty()->GetValue();
 
                 m_scintilla1->SetFoldLevel(l1,l2|l3);
-                rv=false;
+
+                m_CodeLog->AppendText("//code generation for SetFoldLevel is not implimented yet!\n");
             }
             break;
         case SCI_GETFOLDLEVEL:
@@ -7194,13 +8839,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv=true;
+
+                paramGetter(m_CodeLog,"GetFoldLevel",l1);
             }
             break;
         case SCI_SETFOLDFLAGS:
             {
                 m_scintilla1->SetFoldFlags( property->GetValue().GetLong() );
-                rv=false;
+                m_CodeLog->AppendText("//code generation for SetFoldFlags is not implimented yet!\n");
             }
             break;
         case SCI_GETLASTCHILD:
@@ -7212,7 +8858,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetLastChild(l1,l2) );
-                rv=true;
+
+                paramIntSetter(m_CodeLog,"GetLastChild",l1,l2);
             }
             break;
         case SCI_GETFOLDPARENT:
@@ -7222,7 +8869,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->GetFoldParent(l1) );
-                rv=true;
+                paramGetter(m_CodeLog,"GetFoldParent",l1);
             }
             break;
         case SCI_SETFOLDEXPANDED:
@@ -7234,7 +8881,15 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 bool b = it.GetProperty()->GetValue().GetBool();
 
                 m_scintilla1->SetFoldExpanded(l1,b);
-                rv=false;
+
+                wxString cl = "m_stc->SetFoldExpanded(";
+                cl << (int) l1;
+                cl << ",";
+                wxString cl2 = cl;
+                cl << (b?"true":"false");
+                cl << ");\n";
+
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETFOLDEXPANDED:
@@ -7244,7 +8899,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromString( m_scintilla1->GetFoldExpanded(l1)?"True":"False" );
-                rv=true;
+
+                paramGetter(m_CodeLog,"GetFoldExpanded",l1);
             }
             break;
         case SCI_CONTRACTEDFOLDNEXT:
@@ -7254,7 +8910,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt( m_scintilla1->ContractedFoldNext(l1));
-                rv=true;
+                paramGetter(m_CodeLog,"ContractedFoldNext",l1);
             }
             break;
         case SCI_TOGGLEFOLD:
@@ -7264,7 +8920,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 m_scintilla1->ToggleFold(l1);
-                rv=false;
+                intSetter(m_CodeLog,"m_stc->ToggleFold",l1);
             }
             break;
         case SCI_ENSUREVISIBLE:
@@ -7274,7 +8930,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 m_scintilla1->EnsureVisible(l1);
-                rv=false;
+                paramGetter(m_CodeLog,"EnsureVisible",l1);
             }
             break;
         case SCI_ENSUREVISIBLEENFORCEPOLICY:
@@ -7284,13 +8940,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 m_scintilla1->EnsureVisibleEnforcePolicy(l1);
-                rv=false;
+                paramGetter(m_CodeLog,"EnsureVisibleEnforcePolicy",l1);
             }
             break;
         case SCI_SETWRAPMODE:
             {
                 m_scintilla1->SetWrapMode(property->GetValue().GetLong());
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetWrapMode");
             }
             break;
         case SCI_GETWRAPMODE:
@@ -7314,7 +8970,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown wrap mode",i));
                 }
 
-                rv= true;
+                basicGetter(m_CodeLog,"GetWrapMode");
             }
             break;
         case SCI_SETWRAPVISUALFLAGS:
@@ -7324,26 +8980,79 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 int i = property->GetValue().GetLong();
 
+                wxString cl = "m_stc->SetWrapVisualFlags(";
+                wxString cl2 = cl;
+
                 if(i==wxSTC_WRAPVISUALFLAG_NONE)
                 {
                     it.GetProperty()->SetValueFromInt(wxSTC_WRAPVISUALFLAG_NONE);
                     it.GetProperty()->Enable(false);
                     m_scintilla1->SetWrapVisualFlags(wxSTC_WRAPVISUALFLAG_NONE);
+
+                    cl << "wxSTC_WRAPVISUALFLAG_NONE);\n";
                 }
                 else
                 {
                     long l1 = it.GetProperty()->GetValue();
                     it.GetProperty()->Enable(true);
                     m_scintilla1->SetWrapVisualFlags(l1);
+
+
+                    bool found(false);
+                    if((l1&wxSTC_WRAPVISUALFLAG_END)==wxSTC_WRAPVISUALFLAG_END)
+                    {
+                        cl<< "wxSTC_WRAPVISUALFLAG_END";
+                        found=true;
+                    }
+                    if((l1&wxSTC_WRAPVISUALFLAG_START)==wxSTC_WRAPVISUALFLAG_START)
+                    {
+                        cl << (found?"|":"");
+                        cl<< "wxSTC_WRAPVISUALFLAG_START";
+                        found=true;
+                    }
+                    if((l1&wxSTC_WRAPVISUALFLAG_MARGIN)==wxSTC_WRAPVISUALFLAG_MARGIN)
+                    {
+                        cl << (found?"|":"");
+                        cl<< "wxSTC_WRAPVISUALFLAG_MARGIN";
+                        found=true;
+                    }
+                    cl << (found?"":"wxSTC_WRAPVISUALFLAG_NONE");
+                    cl << ");\n";
                 }
 
-                rv=false;
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_SETWRAPVISUALFLAGS2:
             {
-                m_scintilla1->SetWrapVisualFlags(property->GetValue().GetLong());
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetWrapVisualFlags(l1);
+
+                wxString cl = "m_stc->SetWrapVisualFlags(";
+                wxString cl2 = cl;
+
+                    bool found(false);
+                    if((l1&wxSTC_WRAPVISUALFLAG_END)==wxSTC_WRAPVISUALFLAG_END)
+                    {
+                        cl<< "wxSTC_WRAPVISUALFLAG_END";
+                        found=true;
+                    }
+                    if((l1&wxSTC_WRAPVISUALFLAG_START)==wxSTC_WRAPVISUALFLAG_START)
+                    {
+                        cl << (found?"|":"");
+                        cl<< "wxSTC_WRAPVISUALFLAG_START";
+                        found=true;
+                    }
+                    if((l1&wxSTC_WRAPVISUALFLAG_MARGIN)==wxSTC_WRAPVISUALFLAG_MARGIN)
+                    {
+                        cl << (found?"|":"");
+                        cl<< "wxSTC_WRAPVISUALFLAG_MARGIN";
+                        found=true;
+                    }
+                    cl << (found?"":"wxSTC_WRAPVISUALFLAG_NONE");
+                    cl << ");\n";
+
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETWRAPVISUALFLAGS:
@@ -7377,7 +9086,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv= true;
+
+                basicGetter(m_CodeLog,"GetWrapVisualFlags");
             }
             break;
         case SCI_SETWRAPVISUALFLAGSLOCATION:
@@ -7387,26 +9097,66 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 int i = property->GetValue().GetLong();
 
+                wxString cl = "m_stc->SetWrapVisualFlags(";
+                wxString cl2 = cl;
                 if(i==wxSTC_WRAPVISUALFLAGLOC_DEFAULT)
                 {
                     it.GetProperty()->SetValueFromInt(wxSTC_WRAPVISUALFLAGLOC_DEFAULT);
                     it.GetProperty()->Enable(false);
                     m_scintilla1->SetWrapVisualFlagsLocation(wxSTC_WRAPVISUALFLAGLOC_DEFAULT);
+                    cl << "wxSTC_WRAPVISUALFLAGLOC_DEFAULT";
                 }
                 else
                 {
                     long l1 = it.GetProperty()->GetValue();
                     it.GetProperty()->Enable(true);
                     m_scintilla1->SetWrapVisualFlagsLocation(l1);
+
+                    bool found(false);
+                    if((l1&wxSTC_WRAPVISUALFLAGLOC_END_BY_TEXT)==wxSTC_WRAPVISUALFLAGLOC_END_BY_TEXT)
+                    {
+                        cl<< "wxSTC_WRAPVISUALFLAGLOC_END_BY_TEXT";
+                        found=true;
+                    }
+                    if((l1&wxSTC_WRAPVISUALFLAGLOC_START_BY_TEXT)==wxSTC_WRAPVISUALFLAGLOC_START_BY_TEXT)
+                    {
+                        cl << (found?"|":"");
+                        cl<< "wxSTC_WRAPVISUALFLAGLOC_START_BY_TEXT";
+                        found=true;
+                    }
+                    cl << (found?"":"wxSTC_WRAPVISUALFLAGLOC_DEFAULT");
+
+
                 }
 
-                rv=false;
+                cl << ");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_SETWRAPVISUALFLAGSLOCATION2:
             {
-                m_scintilla1->SetWrapVisualFlagsLocation(property->GetValue().GetLong());
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetWrapVisualFlagsLocation(l1);
+                wxString cl = "m_stc->SetWrapVisualFlags(";
+                wxString cl2 = cl;
+
+                    bool found(false);
+                    if((l1&wxSTC_WRAPVISUALFLAGLOC_END_BY_TEXT)==wxSTC_WRAPVISUALFLAGLOC_END_BY_TEXT)
+                    {
+                        cl<< "wxSTC_WRAPVISUALFLAGLOC_END_BY_TEXT";
+                        found=true;
+                    }
+                    if((l1&wxSTC_WRAPVISUALFLAGLOC_START_BY_TEXT)==wxSTC_WRAPVISUALFLAGLOC_START_BY_TEXT)
+                    {
+                        cl << (found?"|":"");
+                        cl<< "wxSTC_WRAPVISUALFLAGLOC_START_BY_TEXT";
+                        found=true;
+                    }
+                    cl << (found?"":"wxSTC_WRAPVISUALFLAGLOC_DEFAULT");
+
+                    cl << ");\n";
+
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETWRAPVISUALFLAGSLOCATION:
@@ -7434,13 +9184,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 }
 
                 property->SetValueFromString(s);
-                rv= true;
+                basicGetter(m_CodeLog,"GetWrapVisualFlagsLocation");
             }
             break;
         case SCI_SETWRAPINDENTMODE:
             {
                 m_scintilla1->SetWrapIndentMode( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetWrapIndentMode");
             }
             break;
         case SCI_GETWRAPINDENTMODE:
@@ -7464,25 +9214,25 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown wrap indent mode",i));
                 }
 
-                rv= true;
+                basicGetter(m_CodeLog,"GetWrapIndentMode");
             }
             break;
         case SCI_SETWRAPSTARTINDENT:
             {
                 m_scintilla1->SetWrapStartIndent( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetWrapStartIndent");
             }
             break;
         case SCI_GETWRAPSTARTINDENT:
             {
                 property->SetValueFromInt( m_scintilla1->GetWrapStartIndent() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetWrapStartIndent");
             }
             break;
         case SCI_SETLAYOUTCACHE:
             {
                 m_scintilla1->SetLayoutCache( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetLayoutCache");
             }
             break;
         case SCI_GETLAYOUTCACHE:
@@ -7510,19 +9260,19 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown layout cache mode",i));
                 }
 
-                rv= true;
+                basicGetter(m_CodeLog,"GetLayoutCache");
             }
             break;
         case SCI_SETPOSITIONCACHE:
             {
                 m_scintilla1->SetPositionCacheSize( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetPositionCacheSize");
             }
             break;
         case SCI_GETPOSITIONCACHE:
             {
                 property->SetValueFromInt( m_scintilla1->GetPositionCacheSize() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetPositionCacheSize");
             }
             break;
         case SCI_LINESSPLIT:
@@ -7532,13 +9282,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 m_scintilla1->LinesSplit(l1);
-                rv=false;
+                paramGetter(m_CodeLog,"LinesSplit",l1);
             }
             break;
         case SCI_LINESJOIN:
             {
                 m_scintilla1->LinesJoin();
-                rv=false;
+                basicGetter(m_CodeLog,"LinesJoin");
             }
             break;
         case SCI_WRAPCOUNT:
@@ -7548,37 +9298,37 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l1 = it.GetProperty()->GetValue();
 
                 property->SetValueFromInt(m_scintilla1->WrapCount(l1));
-                rv=false;
+                paramGetter(m_CodeLog,"WrapCount",l1);
             }
             break;
         case SCI_ZOOMIN:
             {
                 m_scintilla1->ZoomIn();
-                rv=false;
+                basicGetter(m_CodeLog,"ZoomIn");
             }
             break;
         case SCI_ZOOMOUT:
             {
                 m_scintilla1->ZoomOut();
-                rv=false;
+                basicGetter(m_CodeLog,"ZoomOut");
             }
             break;
         case SCI_SETZOOM:
             {
                 m_scintilla1->SetZoom( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetZoom");
             }
             break;
         case SCI_GETZOOM:
             {
                 property->SetValueFromInt( m_scintilla1->GetZoom() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetZoom");
             }
             break;
         case SCI_SETEDGEMODE:
             {
                 m_scintilla1->SetEdgeMode( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetEdgeMode");
             }
             break;
         case SCI_GETEDGEMODE:
@@ -7602,32 +9352,32 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown edge mode",i));
                 }
 
-                rv= true;
+                basicGetter(m_CodeLog,"GetEdgeMode");
             }
             break;
         case SCI_SETEDGECOLUMN:
             {
                 m_scintilla1->SetEdgeColumn( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetEdgeColumn");
             }
             break;
         case SCI_GETEDGECOLUMN:
             {
                 property->SetValueFromInt( m_scintilla1->GetEdgeColumn() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetEdgeColumn");
             }
             break;
         case SCI_SETEDGECOLOUR:
             {
                 wxAny value = property->GetValue();
                 m_scintilla1->SetEdgeColour( value.As<wxColour>() );
-                rv=false;
+                appendOrOverwriteColor(m_CodeLog,"m_stc->SetEdgeColour",  value.As<wxColour>());
             }
             break;
         case SCI_GETEDGECOLOUR:
             {
                 setColorString(property, m_scintilla1->GetEdgeColour());
-                rv=true;
+                basicGetter(m_CodeLog,"GetEdgeColour");
             }
             break;
         case SCI_SETLEXER:
@@ -7636,25 +9386,46 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 m_scintilla1->SetLexer(lexerno);
                 lexerSetHelper(lexerno);
 
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetLexer");
             }
             break;
         case SCI_SETLEXERBOOLPROPERTY:
             {
                 m_scintilla1->SetProperty(property->GetBaseName(),(property->GetValue().GetBool()?"1":"0"));
-                rv=false;
+
+                wxString cl = "m_stc->SetProperty(\"";
+                cl << property->GetBaseName();
+                cl << "\",\"";
+                wxString cl2=cl;
+                cl << (property->GetValue().GetBool()?"1":"0");
+                cl << "\");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_SETLEXERINTPROPERTY:
             {
                 m_scintilla1->SetProperty( property->GetBaseName() , wxString::Format("d",property->GetValue().GetLong()) );
-                rv=false;
+
+                wxString cl = "m_stc->SetProperty(\"";
+                cl << property->GetBaseName();
+                cl << "\",\"";
+                wxString cl2=cl;
+                cl << wxString::Format("d",property->GetValue().GetLong());
+                cl << "\");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_SETLEXERSTRINGPROPERTY:
             {
                 m_scintilla1->SetProperty(property->GetBaseName(),property->GetValue().GetString() );
-                rv=false;
+
+                wxString cl = "m_stc->SetProperty(\"";
+                cl << property->GetBaseName();
+                cl << "\",\"";
+                wxString cl2=cl;
+                cl << property->GetValue().GetString();
+                cl << "\");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETLEXER:
@@ -7771,7 +9542,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
 
                 //property->SetValueFromInt( m_scintilla1->GetLexer());
-                rv=true;
+                basicGetter(m_CodeLog,"GetLexer");
             }
             break;
         case SCI_SETLEXERLANGUAGE:
@@ -7791,7 +9562,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     lexerSetHelper(newlexer);
                 }
 
-                rv=false;
+                appendOrOverwrite2Enum(m_CodeLog,property,"SetLexerLanguage");
             }
             break;
         case SCI_GETLEXERLANGUAGE:
@@ -7813,7 +9584,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(buf);
                 }
 
-                rv=true;
+                m_CodeLog->AppendText("//code generation for SCI_GETLEXERLANGUAGE is not implimented yet!\n");
             }
             break;
         case SCI_LOADLEXERLIBRARY:
@@ -7830,7 +9601,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->Colourise(l1,l2);
-                rv=false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->Colourise",l1,l2);
             }
             break;
         case SCI_CHANGELEXERSTATE:
@@ -7842,13 +9613,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 long l2 = it.GetProperty()->GetValue();
 
                 m_scintilla1->ChangeLexerState(l1,l2);
-                rv=false;
+                appendOrOverwriteIntInt(m_CodeLog,"m_stc->ChangeLexerState",l1,l2);
             }
             break;
         case SCI_PROPERTYNAMES:
             {
                 property->SetValueFromString( m_scintilla1->PropertyNames() );
-                rv=true;
+                basicGetter(m_CodeLog,"PropertyNames");
             }
             break;
         case SCI_PROPERTYTYPE:
@@ -7876,7 +9647,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     property->SetValueFromString(wxString::Format("(%d - unknown property type",i));
                 }
 
-                rv= true;
+                appendOrOverwriteString(m_CodeLog,"m_stc->PropertyType",s);
             }
             break;
         case SCI_DESCRIBEPROPERTY:
@@ -7887,7 +9658,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromString( m_scintilla1->DescribeProperty(s) );
 
-                rv=true;
+                appendOrOverwriteString(m_CodeLog,"m_stc->DescribeProperty",s);
             }
             break;
         case SCI_SETPROPERTY:
@@ -7899,7 +9670,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 wxString s2 = it.GetProperty()->GetValue();
                 m_scintilla1->SetProperty(s1,s2);
 
-                rv=false;
+                wxString cl = "m_stc->SetProperty(\"";
+                cl << s1;
+                cl << "\",\"";
+                wxString cl2=cl;
+                cl << s2;
+                cl << "\");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
             }
             break;
         case SCI_GETPROPERTY:
@@ -7910,7 +9687,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromString( m_scintilla1->GetProperty(s) );
 
-                rv=true;
+                appendOrOverwriteString(m_CodeLog,"m_stc->GetProperty",s);
             }
             break;
         case SCI_GETPROPERTYEXPANDED:
@@ -7921,7 +9698,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromString( m_scintilla1->GetPropertyExpanded(s) );
 
-                rv=true;
+                appendOrOverwriteString(m_CodeLog,"m_stc->GetPropertyExpanded",s);
             }
             break;
         case SCI_GETPROPERTYINT:
@@ -7932,13 +9709,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 
                 property->SetValueFromInt( m_scintilla1->GetPropertyInt(s) );
 
-                rv=true;
+                appendOrOverwriteString(m_CodeLog,"m_stc->GetPropertyExpanded",s);
             }
             break;
         case SCI_DESCRIBEKEYWORDSETS:
             {
                 property->SetValueFromString( m_scintilla1->DescribeKeyWordSets() );
-                rv=false;
+                basicGetter(m_CodeLog,"DescribeKeyWordSets");
             }
             break;
         case SCI_SETKEYWORDS:
@@ -7958,7 +9735,14 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 m_scintilla1->SetKeyWords( msd->get_style() , s );
 
 
-                rv=false;
+                wxString cl = "m_stc->SetKeyWords(";
+                cl << msd->get_style();
+                cl << ",\"";
+                wxString cl2=cl;
+                cl << s;
+                cl << "\");\n";
+                appendOrOverwrite(m_CodeLog,cl,cl2);
+
             }
             break;
 
@@ -7966,7 +9750,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
         case SCI_GETSTYLEBITSNEEDED:
             {
                 property->SetValueFromInt(m_scintilla1->GetStyleBitsNeeded());
-                rv=true;
+                basicGetter(m_CodeLog,"GetStyleBitsNeeded");
             }
             break;
         case SCI_PRIVATELEXERCALL:
@@ -7990,7 +9774,7 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                 property->SetValueFromInt( reinterpret_cast<int>(p) );
 
                 free(buf);
-                rv=false;
+                m_CodeLog->AppendText("//code generation for PrivateLexerCall is not implimented yet!\n");
             }
             break;
         case SCI_SETMODEVENTMASK:
@@ -8005,12 +9789,16 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     it.GetProperty()->SetValueFromInt(wxSTC_MODEVENTMASKALL);
                     it.GetProperty()->Enable(false);
                     m_scintilla1->SetModEventMask(wxSTC_MODEVENTMASKALL);
+
+                    appendOrOverwrite2Enum(m_CodeLog,property,"SetModEventMask");
                 }
                 else
                 {
                     long l1 = it.GetProperty()->GetValue();
                     it.GetProperty()->Enable(true);
                     m_scintilla1->SetModEventMask(l1);
+
+                    appendOrOverwriteInt(m_CodeLog,"m_stc->SetModEventMask",l1);
                 }
 
                 rv=false;
@@ -8018,8 +9806,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             break;
         case SCI_SETMODEVENTMASK2:
             {
-                m_scintilla1->SetModEventMask( property->GetValue().GetLong() );
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetModEventMask( l1 );
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetModEventMask",l1);
             }
             break;
         case SCI_GETMODEVENTMASK:
@@ -8157,7 +9946,8 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
 				}
 
                 property->SetValueFromString(s);
-                rv= true;
+
+                basicGetter(m_CodeLog,"GetModEventMask");
             }
             break;
         case SCI_SETMOUSEDWELLTIME:
@@ -8172,12 +9962,15 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
                     it.GetProperty()->SetValueFromInt(wxSTC_TIME_FOREVER);
                     it.GetProperty()->Enable(false);
                     m_scintilla1->SetMouseDwellTime(wxSTC_TIME_FOREVER);
+                    appendOrOverwrite2Enum(m_CodeLog,property,"SetMouseDwellTime");
                 }
                 else
                 {
                     long l1 = it.GetProperty()->GetValue();
                     it.GetProperty()->Enable(true);
                     m_scintilla1->SetMouseDwellTime(l1);
+
+                    appendOrOverwriteInt(m_CodeLog,"m_stc->SetMouseDwellTime",l1);
                 }
 
                 rv=false;
@@ -8185,8 +9978,9 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             break;
         case SCI_SETMOUSEDWELLTIME2:
             {
-                m_scintilla1->SetMouseDwellTime( property->GetValue().GetLong() );
-                rv=false;
+                long l1 = property->GetValue().GetLong();
+                m_scintilla1->SetMouseDwellTime( l1 );
+                appendOrOverwriteInt(m_CodeLog,"m_stc->SetMouseDwellTime",l1);
             }
             break;
         case SCI_GETMOUSEDWELLTIME:
@@ -8208,13 +10002,13 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
         case SCI_SETIDENTIFIER:
             {
                 m_scintilla1->SetIdentifier( property->GetValue().GetLong() );
-                rv=false;
+                appendOrOverwrite2Int(m_CodeLog,property,"SetIdentifier");
             }
             break;
         case SCI_GETIDENTIFIER:
             {
                 property->SetValueFromInt( m_scintilla1->GetIdentifier() );
-                rv=true;
+                basicGetter(m_CodeLog,"GetIdentifier");
             }
             break;
         default:
@@ -8223,5 +10017,5 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             break;
     }
 
-    return rv;
+    return false;
 }
