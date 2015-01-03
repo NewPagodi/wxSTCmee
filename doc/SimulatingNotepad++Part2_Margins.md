@@ -47,7 +47,7 @@ That defines the contents of that file to be marker 0.  We can add that marker t
 - in the marker group, open the "MarkerAdd" key
 - set the line key to be the line number we want to add the marker to.  The lines for this method start at zero, so to add the marker to the line with line number 18, we use line=17.
 - set the marker key to be the marker we want to add.  In this case, that's marker 0, and the key already has that value; so we don't actually need to change anything.
-- press the button in the "MarkerAdd" key to call the method. <br>![MarkerAdd](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerAdd2.png "MarkerAdd")
+- press the button in the "MarkerAdd" key to call the method. <br>![MarkerAdd](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerAdd3.png "MarkerAdd")
 
 ###### Deleting the Marker from a Line
 
