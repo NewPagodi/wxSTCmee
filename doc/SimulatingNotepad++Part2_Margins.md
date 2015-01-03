@@ -21,9 +21,10 @@ Next I want to give an example of how notepad++ uses its bookmark margin.  When 
 
 ![A bookmarked line in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/bookmarkedlne.png "A bookmarked line")
 
-The actual adding of the circle is done by an event handler.  Suppose we want to add a blue circle to add a bookmark at line 20.  This is done in 2 steps.  First we define a marker.  That will assign it to a number between 1 and 32.  Next we add that marker to a line.  The step of adding a marker for that blue circle **SHOULD** be as follows:
+The actual adding of the circle is done by an event handler.  Suppose we want to add a blue circle to add a bookmark at line 18.  This is done in 2 steps.  First we define a marker.  That will assign it to a number between 0 and 31.  Next we add that marker to a line.  The step of adding a marker for that blue circle **SHOULD** be as follows:
 
 - open the markers group
+- open the marker definitions
 - open marker 0
 - select the button with the "MarkerDefineBitmap" key to open an image file.  The file corresponding to that shiny blue circle is from the scintilla icon package and is included with this repo as "scintilla\16x16\gem_blue.xpm".
 - we can open some some of the files in the "scintilla\16x16\" folder this way, but not that particular one for some reason.
@@ -33,9 +34,10 @@ The actual adding of the circle is done by an event handler.  Suppose we want to
 
 To get around this, with this method and event explorer, I've included the xpm data for all of those files directly into the program and provided an alternate implementation "SCI_MARKERDEFINEPIXMAP" that calls the scintilla method directly with that xpm data.  So instead:
 
-- open the markers group
-- open marker 0
-- open alternative implimentations -> SCI_MARKERDEFINEPIXMAP
+- open the "Markers" group
+- open the "Marker definitions" subgroup
+- open the "Marker 0" item
+- scroll down to "Alternative implimentations -> SCI_MARKERDEFINEPIXMAP"
 - from the drop down list, select "gem_blue.xpm" <br>![SCI_MARKERDEFINEPIXMAP](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerDefineBitmap.png "SCI_MARKERDEFINEPIXMAP")
 	
 ###### Adding the Marker to a Line
@@ -45,7 +47,7 @@ That defines the contents of that file to be marker 0.  We can add that marker t
 - in the marker group, open the "MarkerAdd" key
 - set the line key to be the line number we want to add the marker to.  The lines for this method start at zero, so to add the marker to the line with line number 18, we use line=17.
 - set the marker key to be the marker we want to add.  In this case, that's marker 0, and the key already has that value; so we don't actually need to change anything.
-- press the button in the "MarkerAdd" key to call the method. <br>![MarkerAdd](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerAdd.png "MarkerAdd")
+- press the button in the "MarkerAdd" key to call the method. <br>![MarkerAdd](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerAdd2.png "MarkerAdd")
 
 ###### Deleting the Marker from a Line
 
