@@ -64,7 +64,7 @@ After making these changes to the default group, it's important to call the Styl
                                                                         
 While we're in the "Style definition" group, we can fix the colors for the line number margin.  
  - open the wx_STC_STYLE_LINENUMBER subgroup.
- - set StyleSetForeground to "Gray" or (128,128,128)
+ - set StyleSetForeground to "Grey" or (128,128,128)
  - set StyleSetBackground to (228,228,228) <br>![Line Number Margins Styles](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleDefinitionLineNo.png "Line Number Margins Styles") 
 
 I have no clue why those options are set in the style definition group and not the the margin group, but that is a quirk of Scintilla that we have to live with.
@@ -85,7 +85,7 @@ Second, we need to set the style options for each category.  If you didn't press
  - open the "Style definition" group 
  - open the "Style 0 ... wxSTC_STYLE_DEFAULT-1" subgroup  
  - open the "wxSTC_C_COMMENT - (style 0)" item
- - set the "StyleSetForeground" item to have value (0,128,0):<br>[Comment Style](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/commentStyle.png "Comment Style") 
+ - set the "StyleSetForeground" item to have value (0,128,0):<br>![Comment Style](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/commentStyle.png "Comment Style") 
  - repeat this process setting the foreground colors for the categories as follows:
 
 | Style Number                   | StyleSetForeground| OtherOptions  |
@@ -119,7 +119,7 @@ This behavior can be set as follows:
 
 - open the "Caret, selection, and hotspot styles" group.
 - set the "SetCaretLineVisible" key to true.
-- to match the color that notepad++ uses, set the "SetCaretLineBackground" to (232,232,255)<br>![SetCaretLineVisible](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetCaretLineVisible.png "SetCaretLineVisible")
+- set the "SetCaretLineBackground" to (232,232,255) <br>![SetCaretLineVisible](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetCaretLineVisible.png "SetCaretLineVisible")
 
 #### Fixing a Few More Things
 
@@ -152,7 +152,7 @@ Another difference is that notepad++ has 2 extra pixels spacing for each line th
 
 The final thing I want to show is how to draw the plus and minus boxes in the fold margin as notepad++ does:  
 
-![the fold margin in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/folding.png"notepad++ folding")
+![the fold margin in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/folding.png "notepad++ folding")
 
 When we click the minus symbol on line 21, it collapses all the code from line 21 to 26 into a single line:
 
@@ -186,7 +186,9 @@ When done the lexer options should look like so:
 
 By now we have something like the following:
 
-c
+![Bad Folding Markers](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/foldingInit.png "Bad Folding Markers")
+
+
 This looks nothing like what we wanted.  The problem is that wxStyledTextCtrl uses a white circle as the default for all markers.  To make the margin look right, we need to tell it to use the markers we want:
   
 - open the markers group 
@@ -196,14 +198,15 @@ This looks nothing like what we wanted.  The problem is that wxStyledTextCtrl us
 	+ set MarkerSetForeground to (243,243,243)
 	+ set MarkerSetBackground to Grey or (128,128,128) <br> ![MarkerDefine](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerDefine.png "MarkerDefine")
 - repeat the same process for wxSTC_MARKNUM_FOLDEROPENMID to wxSTC_MARKNUM_FOLDEROPEN using the same colors but change the marker definition as follows
-|Marker                     |MarkerDefine|
-|---------------------------|
-|wxSTC_MARKNUM_FOLDEROPENMID|wxSTC_MARK_BOXMINUSCONNECTED
-|wxSTC_MARKNUM_FOLDERMIDTAIL|wxSTC_MARK_TCORNER
-|wxSTC_MARKNUM_FOLDERTAIL   |wxSTC_MARK_LCORNER
-|wxSTC_MARKNUM_FOLDERSUB    |wxSTC_MARK_VLINE
-|wxSTC_MARKNUM_FOLDER       |wxSTC_MARK_BOXPLUS
-|wxSTC_MARKNUM_FOLDEROPEN   |wxSTC_MARK_BOXMINUS
+
+|Marker                     |MarkerDefine                |
+|---------------------------|----------------------------|
+|wxSTC_MARKNUM_FOLDEROPENMID|wxSTC_MARK_BOXMINUSCONNECTED|
+|wxSTC_MARKNUM_FOLDERMIDTAIL|wxSTC_MARK_TCORNER          |
+|wxSTC_MARKNUM_FOLDERTAIL   |wxSTC_MARK_LCORNER          |
+|wxSTC_MARKNUM_FOLDERSUB    |wxSTC_MARK_VLINE            |
+|wxSTC_MARKNUM_FOLDER       |wxSTC_MARK_BOXPLUS          |
+|wxSTC_MARKNUM_FOLDEROPEN   |wxSTC_MARK_BOXMINUS         |
 
 - for any marker, set the MarkerEnableHighlight key to true.  (In the property grid, setting this key for 1 marker automatically sets all the other markers to have the same value.) <br> ![MarkerEnableHighlight](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerEnableHighlight.png "MarkerEnableHighlight")
 
