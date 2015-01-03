@@ -92,7 +92,11 @@ Now we want to see what kind of information we get in an wxEVT_STC_MARGINCLICK e
 
 ![wxSTC_MARGINCLICK](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/wxSTC_MARGINCLICK.png "wxSTC_MARGINCLICK")
 
-Now if we click the symbol margin on line number 18 (ie line 17) we might see something like the following in the event log:
+Now if we click the symbol margin on line number 18 (ie line 17) like so:
+
+![Clicking in the Margin](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarginCursor.png "Clicking in the Margin")
+
+We might see something like the following in the event log:
 
 ![The Event Log After a Margin Click](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/marginClickEvent.png "The Event Log After a Margin Click")
 
@@ -120,7 +124,7 @@ Now what we want to do is when the symbol margin is clicked, we want to check if
 We can put all of the pieces above together to do this.  An event handler that accomplishes this might look something like the following:
 
 ```c++
-void m_STCFrame::onFoldMarginClick(wxStyledTextEvent& event)
+void m_STCFrame::onMarginClick(wxStyledTextEvent& event)
 {
     int mar = event.GetMargin();
     int pos = event.GetPosition();
