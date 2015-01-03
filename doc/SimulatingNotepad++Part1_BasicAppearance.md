@@ -1,4 +1,4 @@
-#### An Introduction to Scintilla for wxStyledTextCtrl Programmers
+#### Simulating Notepad++ Part1 - Basic Appearance
 
 Other documentation available:
  - [An Introduction to Scintilla for wxStyledTextCtrl Programmers](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/IntroductionToScintilla.md)
@@ -7,28 +7,14 @@ Other documentation available:
  
 In addition, to give some concrete examples of configuring the appearance and behavior of a wxStyledTextCtrl window, I've written a 3 part series on making the window look like the default appearance for notepad++.
 
- - [Simulating Notepad++ Part1 - Basic Appearance](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part1_BasicAppearance.md)
  - [Simulating Notepad++ Part2 - Working with the Margins](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part2_Margins.md)
  - [Simulating Notepad++ Part3 - Advanced Appearance](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part3_AdvancedAppearance.md)
 
- ## wxStyledTextCtrl Method and Event Explorer 
+## Introduction 
+ 
+The following shows a fragment of the sample.cpp file from this repo pasted into a freshly created wxStyledTextCtrl window and the same file opened in notepad++.
 
-wxStyledTextCtrl is a wrapper for the Scintilla text editing component.  As such it includes over 600 methods.  This breaks those methods down by the category they are listed in the scintilla documentation and presents them in a property grid.  Each method can take 0, 1, or 2 parameters.  Any parameters are set with child items in the property grid.  Some methods are set automatically, some require the user to press a button in the property grid to take effect.
-
-![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/sc-2.png "Screen Shot 1")
-
-The 5 main components of the application are shown in the screen shot above.
- - in the upper left is a wxStyledTextCtrl window.
- - in the upper right is a property grid.  Setting properties in the property grid changes the state of the wxStyledTextCtrl.
- - in the middle is a listing of the events emitted by the wxStyledTextCtrl.  No events will be logged unless they are selected in from the "Logged Events" menu item.
- - in the lower left is a (slightly modified) version of the scintilla documentation.  As how select an item in the property grid, the documentation for that item is scrolled into view.
- - in the lower right is a (heavily edited) version of the wxStyledTextCtrl documentation.  As with the Scintilla documentation, the appropriate section is scrolled into view when an item is selected in the property grid.
-
-## Making wxStyledTextCtrl look like notepad++ 
-
-The following shows a fragment of the stcMain.cpp file from this repo pasted into a freshly created wxStyledTextCtrl window and the same file opened in notepad++.
-
-![Raw wxStyledTextCtrl vrs notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/stc_np++comp.png "Comparison 1")
+![Raw wxStyledTextCtrl vrs notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/stc_np++comp2.png "Comparison 1")
 
 The wxStyledTextCtrl window is using a variable width font and has a smaller font size.  In contrast, the notepad++ window has a fixed width font, has colored the comments and keywords of the language to help us identify them, and has some nice margins on the left showing the line numbers and allowing us to collapse code.  I think most coders would agree that the version presented by notepad++ is much more readable.  
 
@@ -57,32 +43,30 @@ Our wxStyledTextCtrl window now has 3 margins with the correct widths.  Those ma
 
 For whatever reason, the colors for the other margins are set in a different property group, so I'll cover that when we get there.
 
-#### Translating the properties to code
-
-There are many more options that need to be set.  But before moving on, let me pause for a second to discuss how you can translate the properties that are set in the property grid to code that you use in your program.  In the work above, we changed the margin width for margin 0 to 30.  The code to accomplish this would be `m_stc->SetMarginWidth(0,30)`.  Notice that the name of the method that needs to be called is the same as the key that was set in the property grid.  
-
-This command supposes your wxStyledTextCtrl is named m_stc. You would, of course, replace "m_stc" with the name for the wxStyledTextCtrl used in your code
-
-Next we changed the width and mask of margin 2.  These are accomplished with "m_stc->SetMarginWidth(2,16)" and "m_stc->SetMarginMask(2,wxSTC_MASK_FOLDERS)".  For almost all the things to be set, the name of the method to call is the key in the property grid.
- 
 #### Setting the lexer (and repairing the damage setting the lexer does)
 
 The next step is to set the lexer to tell the wxStyledTextCtrl that we're working with a c++ file and not just any type of text file.
 
  - open the lexer group
- - change "SetLexer" from "wx_STC_LEX_CONTAINER" to "wx_STC_LEX_CPP"
-
+ - change "SetLexer" from "wx_STC_LEX_CONTAINER" to "wx_STC_LEX_CPP"<br>![Setting the lexer option](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/setLexer.png "Setting the lexer option")
+ 
 Now, somewhat surprisingly, the next time you click in the wxStyledTextCtrl window, all the text seems to disappear.  It's actually been colored white.  That seems to happen the first time a lexer value is set.  I'm not sure why wxStyledTextCtrl/Scintilla does that, but as a programmer, it's good to know that so we can fix it.  With the method and event explorer, we've seen a surprising outcome happen in real time.  We can fix it as follows.
 
 - open the "Style definition" group
 - open the "predefined number styles" subgroup.
-- open the "wxSTC_STYLE_DEFAULT" group.  As the name suggests, this sets the default style options.  Amongst the options that can be set are the font name, the font size, the font color, whether to use bold, italic, or underline and so on.  
-- change the "StyleSetForeground" to black - rgb(0,0,0).  
-- while we're here, notepad++ uses "courier new" and font size 10 by default, so we can set those options under "StyleSetFaceName" and "StyleSetSize"
-- also while we're in the "Style definition" group, we can fix the colors for the line number margin.  Open the wx_STC_STYLE_LINENUMBER subgroup.
-	+ set StyleSetForeground to rgb(128,128,128)
-	+ set StyleSetBackground to rgb(228,228,228)
-		
+- open the "wxSTC_STYLE_DEFAULT" group.  As the name suggests, this sets the default style options.  Amongst the options that can be set are the font name, the font size, the font color, whether to use bold, italic, or underline and so on.  <br>![The Style Definition Group](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleDefinitionGroup.png "The Style Definition Group")  
+- Change "StyleSetFaceName" to "Courier new"
+- Change "StyleSetSize" to 10<br>![The Style Definition Settings](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleDefinitionSettings.png "The Style Definition Settings")
+
+After making these changes to the default group, it's important to call the StyleClearAll method.  Select this item in the property grid and press the button in the value area to call the method:
+
+[StyleClearAll](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleClearAll.png "StyleClearAll")
+
+While we're in the "Style definition" group, we can fix the colors for the line number margin.  
+ - open the wx_STC_STYLE_LINENUMBER subgroup.
+ - set StyleSetForeground to "Gray" or (128,128,128)
+ - set StyleSetBackground to (228,228,228) <br>[Line Number Margins Styles](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleDefinitionLineNo.png "Line Number Margins Styles") 
+
 I have no clue why those options are set in the style definition group and not the the margin group, but that is a quirk of Scintilla that we have to live with.
 
 #### Coloring constants and keywords
@@ -95,8 +79,14 @@ The next step is to color the constants and keywords of the language as notepad+
 	+  `if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace`
 - open the "Secondary kewyords and identifiers (Keyword set 1) property and set the "keywords" property to:
 	+ `void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable`
-
-Second, we need to set the style options for each category.  Open the "Style definition" group and then open the "Style 0 ... wxSTC_STYLE_DEFAULT-1" subgroup.  This will give us a list of the categories of words that the lexer recognizes.  For most of them we only need to set the text foreground color.  These are given in the following table:
+	+ note that these are properties are a little different that most of the others and after you enter the keywords you will need to press the button in the property area to make the changes take effect: <br>[SetKeyWords](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetKeyWords.png "SetKeyWords") 
+	
+Second, we need to set the style options for each category.  If you didn't press the button in the "StyleClearAll" item earlier, make sure to do that now or else some of the following may not work.
+ - open the "Style definition" group 
+ - open the "Style 0 ... wxSTC_STYLE_DEFAULT-1" subgroup  
+ - open the "wxSTC_C_COMMENT - (style 0)" item
+ - set the "StyleSetForeground" item to have value (0,128,0):<br>[Comment Style](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/commentStyle.png "Comment Style") 
+ - repeat this process setting the foreground colors for the categories as follows:
 
 | Style Number                   | StyleSetForeground| OtherOptions  |
 |--------------------------------|-------------------|---------------|
@@ -115,13 +105,9 @@ Second, we need to set the style options for each category.  Open the "Style def
 | wxSTC_C_COMMENTDOCKEYWORD      | (0,128,128)       | bold          |
 | wxSTC_C_COMMENTDOCKEYWORDERROR | (0,128,128)       |               |	
 
-Once all the colors are set, we also need to set wxSTC_C_WORD, wxSTC_C_OPERATOR, wxSTC_C_REGEX, and wxSTC_C_COMMENTDOCKEYWORDERROR to be bold.  Lets focus on the wxSTC_C_WORD category.  Open this category in the propgrid and try setting the StyleSetBold key to be true.  Nothing happens.  What we need to do is   
+Note that with the wxSTC_C_WORD, wxSTC_C_OPERATOR, wxSTC_C_REGEX, and wxSTC_C_COMMENTDOCKEYWORDERROR categories we should also make sure StyleSetBold is set to true as follows:
 
-- select "Courier New" from the "StyleSetFaceName" key (even though that is the same as the default). 
-- this then sets the size back to 8, so we need to change it to back to 10.
-- now we can toggle the boldness with the the "StyleSetBold" key.
-
-Repeat this process for the other 3 categories.  Now as a programmer, we now know that for each categories some of the style options such as color can be set using the default font, but other such as boldness will require us to respecify the font name before we can set them.  
+[Word Style](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/wordStyle.png "Word Style")
 
 #### Highlighting the current line	
 
