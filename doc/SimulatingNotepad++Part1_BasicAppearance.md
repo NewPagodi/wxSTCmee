@@ -1,4 +1,4 @@
-#### Simulating Notepad++ Part1 - Basic Appearance
+## Simulating Notepad++ Part1 - Basic Appearance
 
 Other documentation available:
  - [An Introduction to Scintilla for wxStyledTextCtrl Programmers](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/IntroductionToScintilla.md)
@@ -10,7 +10,7 @@ In addition, to give some concrete examples of configuring the appearance and be
  - [Simulating Notepad++ Part2 - Working with the Margins](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part2_Margins.md)
  - [Simulating Notepad++ Part3 - Advanced Appearance](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part3_AdvancedAppearance.md)
 
-## Introduction 
+#### Introduction 
  
 The following shows a fragment of the sample.cpp file from this repo pasted into a freshly created wxStyledTextCtrl window and the same file opened in notepad++.
 
@@ -60,12 +60,12 @@ Now, somewhat surprisingly, the next time you click in the wxStyledTextCtrl wind
 
 After making these changes to the default group, it's important to call the StyleClearAll method.  Select this item in the property grid and press the button in the value area to call the method:
 
-[StyleClearAll](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleClearAll.png "StyleClearAll")
-
+![StyleClearAll](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleClearAll.png "StyleClearAll")
+                                                                        
 While we're in the "Style definition" group, we can fix the colors for the line number margin.  
  - open the wx_STC_STYLE_LINENUMBER subgroup.
  - set StyleSetForeground to "Gray" or (128,128,128)
- - set StyleSetBackground to (228,228,228) <br>[Line Number Margins Styles](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleDefinitionLineNo.png "Line Number Margins Styles") 
+ - set StyleSetBackground to (228,228,228) <br>![Line Number Margins Styles](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/styleDefinitionLineNo.png "Line Number Margins Styles") 
 
 I have no clue why those options are set in the style definition group and not the the margin group, but that is a quirk of Scintilla that we have to live with.
 
@@ -79,7 +79,7 @@ The next step is to color the constants and keywords of the language as notepad+
 	+  `if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace`
 - open the "Secondary kewyords and identifiers (Keyword set 1) property and set the "keywords" property to:
 	+ `void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable`
-	+ note that these are properties are a little different that most of the others and after you enter the keywords you will need to press the button in the property area to make the changes take effect: <br>[SetKeyWords](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetKeyWords.png "SetKeyWords") 
+	+ note that these are properties are a little different that most of the others and after you enter the keywords you will need to press the button in the property area to make the changes take effect: <br>![SetKeyWords](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetKeyWords.png "SetKeyWords") 
 	
 Second, we need to set the style options for each category.  If you didn't press the button in the "StyleClearAll" item earlier, make sure to do that now or else some of the following may not work.
  - open the "Style definition" group 
@@ -107,69 +107,61 @@ Second, we need to set the style options for each category.  If you didn't press
 
 Note that with the wxSTC_C_WORD, wxSTC_C_OPERATOR, wxSTC_C_REGEX, and wxSTC_C_COMMENTDOCKEYWORDERROR categories we should also make sure StyleSetBold is set to true as follows:
 
-[Word Style](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/wordStyle.png "Word Style")
+![Word Style](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/wordStyle.png "Word Style")
 
 #### Highlighting the current line	
 
-Notepad++ also highlights the line containing the cursor.  This behavior can be set as follows:
+Another nice thing notepad++ does is that it highlights the line containing the cursor.  
+
+![Current Line Highlighting](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/curLineHighlite.png "Current Line Highlighting")
+
+This behavior can be set as follows:
 
 - open the "Caret, selection, and hotspot styles" group.
 - set the "SetCaretLineVisible" key to true.
-- to match the color that notepad++ uses, set the "SetCaretLineBackground" to rgb(232,232,255)
-	
-#### Fixing a few more things:
+- to match the color that notepad++ uses, set the "SetCaretLineBackground" to (232,232,255)<br>![SetCaretLineVisible](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetCaretLineVisible.png "SetCaretLineVisible")
 
-By now the wxStyledTextCtrl is closely resembles the notepad++ window.  Lets look at a comparison: 
+#### Fixing a Few More Things
 
-![Squigles](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/comp2.png "A second comparison")
+By now the wxStyledTextCtrl closely resembles the notepad++ window.  Lets look at a comparison: 
 
-One of the remaining differences is that some of the lines in the wxStyledTextCtrl such as lines 11 and 15 have an blue squigle under them.  This is an example of a style byte indicator.  They can be used by wxStyledTextCtrl to indicate syntax errors or other things about the code that should be brought to the user's attention.  But here it's just annoying.  We can turn it off as follows:
+![A Comparison](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/stc_np++comp3.png "A Comparison")
 
-- return the the lexer group.
-- open the "SetLexer" subgroup.  This subgroup only appears once a lexer has been selected and the options in this subgroup vary from lexer to lexer.
-- when the cpp lexer is selected, the option that causes that blue squigle is "lexer.cpp.track.preprocessor".  Set that property to false.  You may have to toggle it a few times to make it go away.
-	
+I think there are 2 main differences remaining.  First some of the lines in the wxStyledTextCtrl such as lines 11 and 15 have an blue squiggle under them.  Second, the lines in notepad++ have a little extra space between them.
+
+###### Removing the Squiggles
+
+The squiggles are an example of a style byte indicator.  They can be used by wxStyledTextCtrl to indicate syntax errors or other things about the code that should be brought to the user's attention.  But here it's just annoying.  
+
+There are a few different ways to get rid of the squiggles.  One thing we can do is ask the lexer not to indicate them.  Another think is to simply set that indicator invisible.  I'll show how to do the second approach.  
+
+ - open the "Indicators" group
+ - open the "Lexer Indicators" subgroup
+ - open the "indicator 1" item
+ - change the "IndicatorSetStyle" item from "wxSTC_INDIC_TT" to "wxSTC_INDIC_HIDDEN"<br>![IndicatorSetStyle](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/IndicatorSetStyle.png "IndicatorSetStyle")
+ 
+###### Adding Extra Line Spaces
+
 Another difference is that notepad++ has 2 extra pixels spacing for each line than wxStyledTextCtrl has by default.  To add these, we do the following:
 
 - open the "White space" group
 - set the "SetExtraAscent" key to have value 1
-- set the "SetExtraDescent" key to also have value 1
+- set the "SetExtraDescent" key to also have value 1 <br>![SetExtraDescent](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetExtraDescent.png "SetExtraDescent")
   
-#### Using the bookmark margin
-
-Next I want to give an example of how notepad++ uses its bookmark margin.  When the user clicks the bookmark margin it adds a shiny blue circle like so:
-
-![A bookmarked line in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/bookmarkedlne.png "A bookmarked line")
-
-The actual adding of the circle is done by an event handler.  Suppose we want to add a blue circle to add a bookmark at line 20.  This is done in 2 steps.  First we define a marker.  That will assign it to a number between 1 and 32.  Next we add that marker to a line.  The step of adding a marker for that blue circle **SHOULD** be as follows:
-
-- open the markers group
-- open marker 0
-- select the button with the "MarkerDefineBitmap" key to open an image file.  The file corresponding to that shiny blue circle is from the scintilla icon package and is included with this repo as "scintilla\16x16\gem_blue.xpm".
-- we can open some some of the files in the "scintilla\16x16\" folder this way, but not that particular one for some reason.
-- what wxStyledTextCtrl is trying to do is open the image file, convert it to a wxBitmap, save that bitmap to xpm data, and then pass that xpm data to scintilla.  Since the file is already xpm data, this is 2 unnecessary steps.  And there seems to be a bug in the wxWidgets code for opening xpm files that won't let it open this particular file.
-	
-To get around this, with this method and event explorer, I've included the xpm data for all of those files directly into the program and provided an alternate implementation "SCI_MARKERDEFINEPIXMAP" that calls the scintilla method directly with that xpm data.  So instead:
-
-- open the markers group
-- open marker 0
-- open alternative implimentations -> SCI_MARKERDEFINEPIXMAP
-- from the drop down list, select "gem_blue.xpm"
-	
-That defines the contents of that file to be marker 0.  We can add that marker to a line as follows:
-
-- in the marker group, open the "MarkerAdd" key
-- set the line key to be the line number we want to add the marker to.  The lines for this method start at zero, so to add the marker to the line with line number 20, we use line=19.
-- set the marker key to be the marker we want to add.  In this case, that's marker 0, and the key already has that value; so we don't actually need to change anything.
-- press the button in the "MarkerAdd" key to call the method.
-	
-If you want, you can now go back and chose other options from SCI_MARKERDEFINEPIXMAP menu and the marker will be updated in real time.  You can also chose an option from MarkerDefine to use one of the options that are included by wxStyledTextCtrl.  Finally you can set width and height options, then select MarkerDefineRGBAImage image and draw your own marker.
-
 #### Drawing the fold margin
 
-The final thing I want to show is how to draw the fold symbols in the fold margin as notepad++ does.  Clicking the symbols won't actually cause the code to fold - that is done by an event handler that is beyond the scope of this method explorer.  Drawing the fold symbols is done in 2 parts.  First we define additional lexer properties so that the lexer tells us how code should be folded.  Secondly, we set additonal markers.
+The final thing I want to show is how to draw the plus and minus boxes in the fold margin as notepad++ does:  
 
-![the fold margin in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/folding.png "notepad++ folding")
+![the fold margin in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/folding.png"notepad++ folding")
+
+When we click the minus symbol on line 21, it collapses all the code from line 21 to 26 into a single line:
+
+![Folded Code](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/folded.png "Folded Code")
+
+I should mention that clicking the symbols in the method explorer won't actually cause the code to fold.  However, in the next section of the tutorial, I'll discuss how how can write an event handler for your program to accomplish the folding.  
+
+Drawing the fold symbols is done in 2 parts.  First we define additional lexer properties so that the lexer tells us how code should be folded.  Secondly, we set additonal markers.
+
 
 The first part is to set set the lexer properties.  
 - return to the lexer group and open "SetLexer" subgroup. 
@@ -190,149 +182,31 @@ The first part is to set set the lexer properties.
 
 When done the lexer options should look like so:
 
-![wxStyledTextCtrl lexer options](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/foldOptions.png "Lexer options")
+![wxStyledTextCtrl lexer options](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/foldOptions.png "Lexer options")
 
 By now we have something like the following:
 
-![wxStyledTextCtrl with markers set incorrectly](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/foldingInit.png "Wrong markers")
-
-This looks nothing like what we wanted.  The problem is that wxStyledTextCtrl uses a white circle as the default for all markers.  To make the margin look right, we need to tell it to use the markers we want:  
-- return to the markers group
-- open the marker definitions subgroup if its not still open
-- for markers 25 - 31 (wxSTC_MARKNUM_FOLDEREND - wxSTC_MARKNUM_FOLDEROPEN) we need to change:
-	+ set MarkerSetForeground to rgb(243,243,243)
-	+ set MarkerSetBackground to Grey or rgb(128,128,128)
-- for wxSTC_MARKNUM_FOLDEREND set MarkerDefine to wxSTC_MARK_BOXPLUSCONNECTED
-- for wxSTC_MARKNUM_FOLDEROPENMID set MarkerDefine to wxSTC_MARK_BOXMINUSCONNECTED
-- for wxSTC_MARKNUM_FOLDERMIDTAIL set MarkerDefine to wxSTC_MARK_TCORNER
-- for wxSTC_MARKNUM_FOLDERTAIL set MarkerDefine to wxSTC_MARK_LCORNER
-- for wxSTC_MARKNUM_FOLDERSUB set MarkerDefine to wxSTC_MARK_VLINE
-- for wxSTC_MARKNUM_FOLDER set MarkerDefine to wxSTC_MARK_BOXPLUS
-- for wxSTC_MARKNUM_FOLDEROPEN set MarkerDefine to wxSTC_MARK_BOXMINUS 
-- for any marker, set the MarkerEnableHighlight key to true.  (In the property grid, setting this key for 1 marker automatically sets all the other markers to have the same value.)  
-        
-#### Folding
-
-As I mentioned, this makes the fold margin appear correct, but it will not fold on its own without additional programming.  Lets explore what might be required for that programming.  Suppose we want to fold line number 306. As shown in the following snippet:
-
-![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/unfolded.png "Unfolded Code")
+c
+This looks nothing like what we wanted.  The problem is that wxStyledTextCtrl uses a white circle as the default for all markers.  To make the margin look right, we need to tell it to use the markers we want:
   
-This is accomplished programmatically as follows:
+- open the markers group 
+- open the marker definitions subgroup <br> ![Markers Group](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/markersGroup.png "Markers Group")
+- scroll down to wxSTC_MARKNUM_FOLDEREND (Marker 25) and
+	+ set MarkerDefine to wxSTC_MARK_BOXPLUSCONNECTED
+	+ set MarkerSetForeground to (243,243,243)
+	+ set MarkerSetBackground to Grey or (128,128,128) <br> ![MarkerDefine](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerDefine.png "MarkerDefine")
+- repeat the same process for wxSTC_MARKNUM_FOLDEROPENMID to wxSTC_MARKNUM_FOLDEROPEN using the same colors but change the marker definition as follows
+|Marker                     |MarkerDefine|
+|---------------------------|
+|wxSTC_MARKNUM_FOLDEROPENMID|wxSTC_MARK_BOXMINUSCONNECTED
+|wxSTC_MARKNUM_FOLDERMIDTAIL|wxSTC_MARK_TCORNER
+|wxSTC_MARKNUM_FOLDERTAIL   |wxSTC_MARK_LCORNER
+|wxSTC_MARKNUM_FOLDERSUB    |wxSTC_MARK_VLINE
+|wxSTC_MARKNUM_FOLDER       |wxSTC_MARK_BOXPLUS
+|wxSTC_MARKNUM_FOLDEROPEN   |wxSTC_MARK_BOXMINUS
 
-- open Folding group
-- open the ToggleFold property
-- recall that lines start at 0 while line numbers start at 1, so the line with line number 306 is line 305.
-- enter 305 for the line.  
-- press the button next to the ToggleFold key to call the method.
+- for any marker, set the MarkerEnableHighlight key to true.  (In the property grid, setting this key for 1 marker automatically sets all the other markers to have the same value.) <br> ![MarkerEnableHighlight](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/MarkerEnableHighlight.png "MarkerEnableHighlight")
 
-![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/folded.png "Folded Code")
-  
-#### Putting what we've learned into code
-
-Assuming our wxStyledTextCtrl is named m_stc, we can translate everything we've done above directly into code.  For each step of the process, the method to call has the same name as the key that was set in the propgrid.  Any arguments needed  for the method are either given by the value of the key or the value of child properties of that key.  The complete code is as follows:
-
-```c++
-    m_stc->SetMarginWidth(0,30);
-    m_stc->SetMarginWidth(2,14);
-    m_stc->SetMarginMask(2,wxSTC_MASK_FOLDERS);
-    m_stc->SetFoldMarginColour(true,wxColor(255,255,255));
-    m_stc->SetFoldMarginHiColour(true,wxColor(233,233,233));
-    m_stc->SetLexer(wxSTC_LEX_CPP);
-
-    m_stc->StyleSetFaceName(wxSTC_STYLE_DEFAULT,"Courier New");
-    m_stc->StyleSetSize(wxSTC_STYLE_DEFAULT,10);
-    m_stc->StyleSetForeground(wxSTC_STYLE_LINENUMBER,wxColor(128,128,128));
-    m_stc->StyleSetBackground(wxSTC_STYLE_LINENUMBER,wxColor(228,228,228));
-
-    m_stc->SetKeyWords(0,"if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace");
-    m_stc->SetKeyWords(1,"void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable");
-
-    m_stc->StyleSetForeground(wxSTC_C_COMMENT,               wxColor(0,128,0));
-    m_stc->StyleSetForeground(wxSTC_C_COMMENTLINE,           wxColor(0,128,0)  );
-    m_stc->StyleSetForeground(wxSTC_C_COMMENTDOC,            wxColor(0,128,128)  );
-    m_stc->StyleSetForeground(wxSTC_C_NUMBER,                wxColor(255,128,0) );
-    m_stc->StyleSetForeground(wxSTC_C_WORD,                  wxColor(0,0,255));
-    m_stc->StyleSetForeground(wxSTC_C_STRING,                wxColor(128,128,128) );
-    m_stc->StyleSetForeground(wxSTC_C_CHARACTER,             wxColor(128,128,128) );
-    m_stc->StyleSetForeground(wxSTC_C_PREPROCESSOR,          wxColor(128,64,0) );
-    m_stc->StyleSetForeground(wxSTC_C_OPERATOR,              wxColor(0,0,128));
-    m_stc->StyleSetForeground(wxSTC_C_REGEX,                 wxColor(0,0,0) );
-    m_stc->StyleSetForeground(wxSTC_C_COMMENTLINEDOC,        wxColor(0,128,128));
-    m_stc->StyleSetForeground(wxSTC_C_WORD2,                 wxColor(128,0,255));
-    m_stc->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORD,     wxColor(0,128,128));
-    m_stc->StyleSetForeground(wxSTC_C_COMMENTDOCKEYWORDERROR,wxColor(0,128,128) );
-
-    m_stc->StyleSetFaceName(wxSTC_C_WORD,"Courier New");
-    m_stc->StyleSetSize(wxSTC_C_WORD,10);
-    m_stc->StyleSetBold(wxSTC_C_WORD,true);
-
-    m_stc->StyleSetFaceName(wxSTC_C_OPERATOR,"Courier New");
-    m_stc->StyleSetSize(wxSTC_C_OPERATOR,10);
-    m_stc->StyleSetBold(wxSTC_C_OPERATOR,true);
-
-    m_stc->StyleSetFaceName(wxSTC_C_REGEX,"Courier New");
-    m_stc->StyleSetSize(wxSTC_C_REGEX,10);
-    m_stc->StyleSetBold(wxSTC_C_REGEX,true);
-
-    m_stc->StyleSetFaceName(wxSTC_C_COMMENTDOCKEYWORD,"Courier New");
-    m_stc->StyleSetSize(wxSTC_C_COMMENTDOCKEYWORD,10);
-    m_stc->StyleSetBold(wxSTC_C_COMMENTDOCKEYWORD,true);
-
-    m_stc->SetCaretLineVisible(true);
-    m_stc->SetCaretLineBackground(wxColor(232,232,255));
-
-    m_stc->SetProperty("lexer.cpp.track.preprocessor","0");
-    m_stc->SetExtraAscent(1);
-    m_stc->SetExtraDescent(1);
-
-    m_stc->SetProperty("styling.within.preprocessor",   "1");
-    m_stc->SetProperty("lexer.cpp.allow.dollars",       "0");
-    //m_stc->SetProperty("lexer.cpp.track.preprocessor","");
-    m_stc->SetProperty("lexer.cpp.update.preprocessor", "1");
-    m_stc->SetProperty("lexer.cpp.triplequoted.strings","0");
-    m_stc->SetProperty("lexer.cpp.hashquoted.strings",  "0");
-    m_stc->SetProperty("fold",                          "1");
-    m_stc->SetProperty("fold.cpp.syntax.based",         "1");
-    m_stc->SetProperty("fold.comment",                  "1");
-    m_stc->SetProperty("fold.cpp.comment.multiline",    "1");
-    m_stc->SetProperty("fold.cpp.comment.explicit",     "0");
-    m_stc->SetProperty("fold.cpp.explicit.start",       "");
-    m_stc->SetProperty("fold.cpp.explicit.end",         "");
-    m_stc->SetProperty("fold.cpp.explicit.anywhere",    "0");
-    m_stc->SetProperty("fold.preprocessor",             "1");
-    m_stc->SetProperty("fold.compact",                  "0");
-    m_stc->SetProperty("fold.at.else",                  "1");
-
-    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEREND,wxSTC_MARK_BOXPLUSCONNECTED);
-    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDEREND,wxColor(243,243,243));
-    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDEREND,wxColor(128,128,128));
-
-    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPENMID,wxSTC_MARK_BOXMINUSCONNECTED);
-    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDEROPENMID,wxColor(243,243,243));
-    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDEROPENMID,wxColor(128,128,128));
-
-    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_TCORNER);
-    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDERMIDTAIL,wxColor(243,243,243));
-    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDERMIDTAIL,wxColor(128,128,128));
-
-    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL,wxSTC_MARK_LCORNER);
-    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDERTAIL,wxColor(243,243,243));
-    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDERTAIL,wxColor(128,128,128));
-
-    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERSUB,wxSTC_MARK_VLINE);
-    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDERSUB,wxColor(243,243,243));
-    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDERSUB,wxColor(128,128,128));
-
-    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDER,wxSTC_MARK_BOXPLUS);
-    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDER,wxColor(243,243,243));
-    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDER,wxColor(128,128,128));
-
-    m_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPEN,wxSTC_MARK_BOXMINUS);
-    m_stc->MarkerSetForeground(wxSTC_MARKNUM_FOLDEROPEN,wxColor(243,243,243));
-    m_stc->MarkerSetBackground(wxSTC_MARKNUM_FOLDEROPEN,wxColor(128,128,128));
-
-    m_stc->MarkerEnableHighlight(true);
-``` 
 
 
 

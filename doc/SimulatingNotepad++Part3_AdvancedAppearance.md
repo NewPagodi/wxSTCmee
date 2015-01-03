@@ -28,3 +28,8 @@ To get such a vertical line with a wxStyledTextCtrl window, we need to do the fo
 
 ![Long Line Settings](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/longLineSet.png "Long Line Settings")
 
+
+<!---
+Additional sections I hope to write:
+carret color
+-->
