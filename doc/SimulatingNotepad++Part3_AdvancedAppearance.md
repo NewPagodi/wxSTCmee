@@ -1,4 +1,4 @@
-#### Simulating Notepad++ Part3 - Advanced Appearance
+## Simulating Notepad++ Part3 - Advanced Appearance
 
 Other documentation available:
  - [An Introduction to Scintilla for wxStyledTextCtrl Programmers](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/DocPart1_IntroductionToScintilla.md)
@@ -10,10 +10,18 @@ In addition, to give some concrete examples of configuring the appearance and be
  - [Simulating Notepad++ Part1 - Basic Appearance](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part1_BasicAppearance.md)
  - [Simulating Notepad++ Part2 - Working with the Margins](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part2_Margins.md)
 
-## Introduction
+#### Introduction
 In this tutorial, I want to give some additional examples of scintilla options.  As in the previous 2 tutorials, I'll use notepad++ as the basis for setting the options.  
 
-## The Long Line Indicator
+#### Setting the Caret Color
+
+Notepad++ uses a bluish caret instead of a black one.  This can be set as follows:
+
+ - open the "Caret, selection, and hotspot styles" group
+ - change the "SetCaretForeground" item to (128,0,255) <br> ![SetCaretForeground](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetCaretForeground.png "SetCaretForeground")
+
+
+#### The Long Line Indicator
 
 Notepad++ can optionally display a vertical line
 
