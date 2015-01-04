@@ -11,7 +11,7 @@ In addition, to give some concrete examples of configuring the appearance and be
  - [Simulating Notepad++ Part3 - Advanced Appearance](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/SimulatingNotepad++Part3_AdvancedAppearance.md)
 
  
-## Introduction
+#### Introduction
 
 In the previous tutorial, I discussed how to make a wxStyledTextCtrl window have the same basic appearance as notepad++.  In this part of the tutorial I want to discuss how to use information from the event explorer to write event handlers for the margins. 
   
@@ -146,18 +146,99 @@ void m_STCFrame::onMarginClick(wxStyledTextEvent& event)
   
 #### Folding
 
-As I mentioned, this makes the fold margin appear correct, but it will not fold on its own without additional programming.  Lets explore what might be required for that programming.  Suppose we want to fold line number 306. As shown in the following snippet:
+Now I want to turn to exploring what we can do to make the fold margin work in a way similar to how notepad++.  Recall that the notepad++ fold margin looks something like the following:
 
-![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/unfolded.png "Unfolded Code")
-  
-This is accomplished programmatically as follows:
+![the fold margin in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/folding.png "notepad++ folding")
 
-- open Folding group
-- open the ToggleFold property
-- recall that lines start at 0 while line numbers start at 1, so the line with line number 306 is line 305.
-- enter 305 for the line.  
-- press the button next to the ToggleFold key to call the method.
+When we click the minus symbol on line number 21, the code collapses down to a single line.
 
-![wxStyledTextCtrl Method and Event Explorer Screen Shot](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/folded.png "Folded Code")
+![Folded Code](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/folded.png "Folded Code")
+
+###### Setting the Fold Margin Sensitive
+
+As with the bookmark margin, an event won't be raised for clicks in the fold margin unless that margin is declared to be sensitive.  We might as well take care of this now:
+
+ - open the "Margins" group
+ - open the "Margin 2" item
+ - set "SetMarginSensitive" to be true <br> ![SetMarginSensitive](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetMarginSensitive2.png "SetMarginSensitive")
+
+###### The ToggleFold Method
+
+Collapsing and restoring the code is done with the ToggleFold method.  Suppose we want to collapse line number 21.  We can accomplish this as follows:
+
+ - open the "Folding" group
+ - open the "ToggleFold" item
+ - set the "line" value to 20
+ - press the button in ToggleFold value area<br> ![ToggleFold](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/ToggleFold.png "ToggleFold")
+ 
+Recall that somewhat confusingly, the line with line number 21 is actually line 20. 
+
+###### Setting Fold Flags
+
+We now have something like the following in the wxStyledTextCtrl window:
+
+![Folded Code](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/folded2.png "Folded Code")
+ 
+One difference between what notepad++ does and our wxStyledTextCtrl window is that notepad++ draws a horizontal line under the collapsed code to indicate that some of the code has been hidden.  If we want this vertical line, we can set it as follows:
+
+ - return to the "Folding" group
+ - open the "SetFoldFlags" item
+ - set "wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED" to be true<br> ![SetFoldFlags](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetFoldFlags.png  "SetFoldFlags")
+ 
+###### Getting the Fold Level
+
+We are almost ready to write an event handler to make code in the window fold based on mouse clicks.  I discussed in the previous section how an event handler receives the file position of the mouse click and how that position can be translated into a line.  So we might want to simply take take that line and call the ToggleFold method with it.  
+
+That will work, but it can make for somewhat annoying fold behavior. The code will fold if we click anywhere in the fold margin.  What we probably want is to is fold only when a plus or minus symbol has been clicked.  
+
+We can detect this using the GetFoldLevel method.  This method takes a line as a parameter and returns a 32 bit integer where the first 12 bits are used to give a numeric fold level.  The 13th bit can be set to 1 if the line is a white space line. And the 14th bit can be set to 1 it the line is a fold header.   
+ 
+So for example if we call this method with line 20, we would get something like the following:
+
+![GetFoldLevel](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/GetFoldLevel1.png  "GetFoldLevel")
+
+The fold level for line 20 is set to 1024 and the wxSTC_FOLDLEVELHEADERFLAG bit has been set.
+
+![GetFoldLevel](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/GetFoldLevel2.png  "GetFoldLevel")
+ 
+The fold level for line 21 is 1025 and neither of the special bits have been set.  
+
+So if we want to check if a line is a fold header or not, what we can do is get the fold level for that line, store it in a variable called `foldLevel`, and then check if `(foldLevel & 1<<13)` is non-zero.  That will tell us if the 14th bit was set or not.  
+
+In stc.h, wxSTC_FOLDLEVELHEADERFLAG is defined to be (1<<13).  So we can check instead `(foldLevel & wxSTC_FOLDLEVELHEADERFLAG)`.  That's a little more readable than `(foldLevel & 1<<13)`.
+
+###### Putting All the Pieces Together
+
+We now have all the pieces we need.  The following is an example of an event handler for margin clicks that will toggle a bookmark symbol in margin 1 and collapse or expand code in the fold margin when a plus or minus box is clicked.
+
+```c++
+void npSTCFrame::onMarginClick(wxStyledTextEvent& event)
+{
+    int margin   = event.GetMargin();
+    int position = event.GetPosition();
+
+    int  line        = m_stc->LineFromPosition(position);
+    long lineMarkers = m_stc->MarkerGet(line);
+
+    int  foldLevel  = m_stc->GetFoldLevel(line);
+    bool headerFlag = (foldLevel& wxSTC_FOLDLEVELHEADERFLAG)?true:false;
+
+    if( margin==2 && headerFlag )
+    {
+        m_stc->ToggleFold(line);
+    }
+    else if( margin==1 )
+    {
+        if( lineMarkers & 1<<0 )
+        {
+            m_stc->MarkerDelete(line,0);
+        }
+        else
+        {
+            m_stc->MarkerAdd(line,0);
+        }
+    }
+}
+```
   
 
