@@ -17,9 +17,9 @@ In the previous tutorial, I discussed how to make a wxStyledTextCtrl window have
   
 #### Using the Bookmark Margin
 
-Next I want to give an example of how notepad++ uses its bookmark margin.  When the user clicks the bookmark margin it adds a shiny blue circle like so:
+Next I want to give an example of how notepad++ uses its bookmark margin.  When the user clicks the bookmark margin it adds a shiny blue circle to indicate that a bookmark has been added to the line.  When the user clicks that bookmark symbol, it is removed.
 
-![A bookmarked line in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/bookmarkedlne.png "A bookmarked line")
+![A bookmarked line in notepad++](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/bookmarkedlne.gif "A bookmarked line")
 
 The actual adding of the circle is done by an event handler.  Suppose we want to add a blue circle to add a bookmark at line 18.  This is done in 2 steps.  First we define a marker.  That will assign it to a number between 0 and 31.  Next we add that marker to a line.  The step of adding a marker for that blue circle **SHOULD** be as follows:
 
