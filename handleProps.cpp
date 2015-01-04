@@ -9727,10 +9727,10 @@ bool propgridtest03Frame::handle_property(wxPGProperty* property)
             {
                 myStyleData* msd = dynamic_cast<myStyleData*>(property->GetClientObject());
 
-                wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
-                it++;
-                wxString s = it.GetProperty()->GetValue();
-
+                //wxPropertyGridIterator it = m_propgrid->GetGrid ()->GetIterator(wxPG_ITERATE_DEFAULT,property);
+                //it++;
+                //wxString s = it.GetProperty()->GetValue();
+                wxString s = property->GetValue().GetString();
 
                 m_scintilla1->SetKeyWords( msd->get_style() , s );
 

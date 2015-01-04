@@ -69,17 +69,17 @@ While we're in the "Style definition" group, we can fix the colors for the line 
 
 I have no clue why those options are set in the style definition group and not the the margin group, but that is a quirk of Scintilla that we have to live with.
 
-#### Coloring constants and keywords
+#### Coloring Constants and Keywords
 
 The next step is to color the constants and keywords of the language as notepad++ does.  This is done in 2 parts.  First we return to the lexer group and set the keywords.  
 
 - open the lexer group if its not still open
 - open the "SetKeyWords" subgroup
-- open the "Primary keywords and identifiers (Keyword set 0) property and set the "keywords" property to:
+- set the "Primary keywords and identifiers (Keyword set 0)" item to:
 	+  `if else switch case default break goto return for while do continue typedef sizeof NULL new delete throw try catch namespace`
-- open the "Secondary kewyords and identifiers (Keyword set 1) property and set the "keywords" property to:
+- set the "Secondary keywords and identifiers (Keyword set 1)" to:
 	+ `void struct union enum char short int long double float signed unsigned const static extern auto register volatile bool class private protected public friend inline template virtual asm explicit typename mutable`
-	+ note that these are properties are a little different that most of the others and after you enter the keywords you will need to press the button in the property area to make the changes take effect: <br>![SetKeyWords](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetKeyWords.png "SetKeyWords") 
+	+ note that these are properties are a little different that most of the others and after you enter the keywords you will need to press the button in the property area to make the changes take effect: <br>![SetKeyWords](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/SetKeyWords2.png "SetKeyWords") 
 	
 Second, we need to set the style options for each category.  If you didn't press the button in the "StyleClearAll" item earlier, make sure to do that now or else some of the following may not work.
  - open the "Style definition" group 
@@ -164,30 +164,13 @@ Drawing the fold symbols is done in 2 parts.  First we define additional lexer p
 
 
 The first part is to set set the lexer properties.  
-- return to the lexer group and open "SetLexer" subgroup. 
-- the values shown in the check boxes may not be 100% correct, so run down the list and
-	+ toggle anything true to false
-	+ toggle anything false to true and then back to false
-- this guarentees that all of the lexer properties are, in fact, set false.
-- now to make the code fold as notepad++ does, make the following true: 
-	+ styling.within.preprocessor 
-	+ lexer.cpp.update.preprocessor 
-	+ fold 
-	+ fold.cpp.syntax.based
-	+ fold.comment 
-	+ fold.cpp.comment.multiline
-	+ fold.preprocessor
-	+ fold.at.else
-- without doing that second step, some of these may show as true even if they're not actually true (fixing this is very high on the todo list for this method explorer, but please bear with me for now).
-
-When done the lexer options should look like so:
-
-![wxStyledTextCtrl lexer options](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/foldOptions.png "Lexer options")
+ - return to the lexer group
+ - open "SetLexer" subgroup. 
+ - check the boxes as follows: <br>![wxStyledTextCtrl lexer options](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/foldOptions2.png "Lexer options")
 
 By now we have something like the following:
 
 ![Bad Folding Markers](https://github.com/NewPagodi/wxSTCmee/blob/master/doc/img/foldingInit.png "Bad Folding Markers")
-
 
 This looks nothing like what we wanted.  The problem is that wxStyledTextCtrl uses a white circle as the default for all markers.  To make the margin look right, we need to tell it to use the markers we want:
   

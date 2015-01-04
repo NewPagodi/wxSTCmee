@@ -234,7 +234,7 @@ void propgridtest03Frame::addSearching()
     //SCI_FINDTEXT(int flags, Sci_TextToFind *ttf)
         wxPGProperty* np = addStringProp(st, "FindText", "SCI_FINDTEXT", SCI_FINDTEXT,true,true);
         addIntParam(np,"minPos",0,0, INT_MAX);
-        addIntParam(np,"maxPos,",0,0, INT_MAX);
+        addIntParam(np,"maxPos,",0,-1, INT_MAX);
         addStringParam(np, "text",true);
         addFlagsParam(np,"searchFlags",0,cases,cases_values);
         m_propgrid->Collapse(np);
@@ -4508,11 +4508,15 @@ void propgridtest03Frame::addLexer(wxStyledTextCtrl* stc_def)
         np=addStringProp(st,"SetKeyWords","SCI_SETKEYWORDS", SCI_SETKEYWORDS,false,true);
         for(int i=0;i<=wxSTC_KEYWORDSET_MAX;i++)
         {
-            np2=addStringProp(np,lexerInfo->getKWName(-1,i),"zzz", SCI_SETKEYWORDS2,false,true);
+            //np2=addLongStringProp(np,lexerInfo->getKWName(-1,i),"zzz", SCI_SETKEYWORDS2,false,false);
+
+            np2 = m_propgrid->AppendIn(np,new wxLongStringProperty(lexerInfo->getKWName(-1,i),"zzz"));
+            np2->SetClientData(reinterpret_cast<void *>(SCI_SETKEYWORDS2));
+            //np2=addStringProp(np,lexerInfo->getKWName(-1,i),"zzz", SCI_SETKEYWORDS2,false,true);
             np2->SetClientObject(new myStyleData(i));
-            addStringParam(np2, "keyWords",true);
+            //addStringParam(np2, "keyWords",true);
             lexerInfo->setKWVec(i,np2);
-            m_propgrid->Collapse(np2);
+            //m_propgrid->Collapse(np2);
         }
         m_propgrid->Collapse(np);
 

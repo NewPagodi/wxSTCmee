@@ -213,7 +213,9 @@ void propgridtest03Frame::lexerSetHelper(int lexerno)
             np = m_propgrid->AppendIn(LexerProp,new wxBoolProperty(label));
             np->SetClientData(reinterpret_cast<void *>(SCI_SETLEXERBOOLPROPERTY));
             m_propgrid->SetPropertyAttribute( np,wxPG_BOOL_USE_CHECKBOX,true );
-            np->SetValue( dv=="0" );
+            //np->SetValue( dv=="0" );
+            np->SetValue( dv!="0" );
+            //m_propgrid->SetPropertyValueUnspecified(np);
 
 
         }
